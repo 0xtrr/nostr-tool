@@ -15,6 +15,11 @@ cargo install --path .
 
 ## Examples
 
+### Update metadata
+```shell
+nostr-tool -r "wss://nostr.oxtr.dev" update-metadata -n "Alice" -a "Who the fuck is Alice?" -p "https://upload.wikimedia.org/wikipedia/en/2/2b/New_world-living_next_door_to_alice.JPG"
+```
+
 ### Create a new note with a new identity
 
 ```shell
