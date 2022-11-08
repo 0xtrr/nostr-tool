@@ -1,0 +1,16 @@
+[package]
+name = "nostr-tool"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version = "0.4.22", features = ["serde"] }
+clap = { version = "4.0.22", features = ["derive"] }
+serde = "1.0.147"
+tungstenite = "0.17.3"
+secp256k1 = { version = "0.24", features = ["bitcoin_hashes", "global-context", "rand-std"] }
+serde_json = "1.0.87"
+nostr_rust = "0.5.0"
+
