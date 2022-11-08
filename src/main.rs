@@ -13,39 +13,59 @@ use secp256k1::rand::rngs::OsRng;
 #[command(version = "0.1")]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    #[command(subcommand)]
+    command: Commands,
     /// User private key
     #[arg(short, long)]
-    privatekey: Option<String>,
+    private_key: Option<String>,
     /// Relay to connect to
     #[arg(short, long, action = clap::ArgAction::Append)]
     relay: Vec<String>,
-    /// Event kind
-    #[arg(short, long)]
-    kind: u32,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Update metadata
+    UpdateMetadata(UpdateMetadata),
+    /// Send text note
+    TextNote(TextNote),
+}
+
+#[derive(Args)]
+struct TextNote {
     /// Text note content
     #[arg(short, long)]
-    content: Option<String>,
+    content: String,
     /// Pubkey references
     #[arg(long, action = clap::ArgAction::Append)]
     ptag: Vec<String>,
+    /// Event references
     #[arg(long, action = clap::ArgAction::Append)]
     etag: Vec<String>,
-    /// Name value for kind 0 event
-    #[arg(long)]
+}
+
+#[derive(Args)]
+struct UpdateMetadata {
+    /// Profile name
+    #[arg(short, long)]
     name: Option<String>,
-    /// About value for kind 0 event
-    #[arg(long)]
+    /// About
+    #[arg(short, long)]
     about: Option<String>,
-    /// Picture value to set for kind 0 event
-    #[arg(long)]
+    /// Picture URL
+    #[arg(short, long)]
     picture: Option<String>,
 }
 
 fn main() {
     // Parse input
     let args: Cli = Cli::parse();
+
+    if args.relay.is_empty() {
+        panic!("No relays specified, one relay is required!")
+    }
     // Parse and validate private key
-    let identity = match args.privatekey {
+    let identity = match args.private_key {
         Some(pk) => {
             println!("Using provided private key");
             let identity = Identity::from_str(pk.as_str()).unwrap();
@@ -66,30 +86,19 @@ fn main() {
         Client::new(str_slice).unwrap()
     ));
 
-    // Set up tags
-    let mut tags: Vec<Vec<String>> = vec![];
-    for tag in args.ptag.iter() {
-        let new_tag = vec![String::from("p"), String::from(tag)];
-        tags.push(new_tag);
-    }
-    for tag in args.etag.iter() {
-        let new_tag = vec![String::from("e"), String::from(tag)];
-        tags.push(new_tag);
-    }
-
     // Post event
-    match &args.kind {
-        0 => {
+    match &args.command {
+        Commands::UpdateMetadata(metadata) => {
             // Set metadata
-            let name = match &args.name {
+            let name = match &metadata.name {
                 Some(name) => Some(name.as_str()),
                 None => None,
             };
-            let about = match &args.about {
+            let about = match &metadata.about {
                 Some(about) => Some(about.as_str()),
                 None => None,
             };
-            let picture = match &args.picture {
+            let picture = match &metadata.picture {
                 Some(picture) => Some(picture.as_str()),
                 None => None,
             };
@@ -98,22 +107,25 @@ fn main() {
                 .unwrap()
                 .set_metadata(&identity, name, about, picture)
                 .unwrap();
+            println!("Metadata updated");
         }
-        1 => {
-            // Create text note
-            let content = match &args.content {
-                Some(content) => content,
-                None => panic!("Content must be set to create a kind 1 event")
-            };
+        Commands::TextNote(text_note) => {
+            // Set up tags
+            let mut tags: Vec<Vec<String>> = vec![];
+            for tag in text_note.ptag.iter() {
+                let new_tag = vec![String::from("p"), String::from(tag)];
+                tags.push(new_tag);
+            }
+            for tag in text_note.etag.iter() {
+                let new_tag = vec![String::from("e"), String::from(tag)];
+                tags.push(new_tag);
+            }
             let event = client
                 .lock()
                 .unwrap()
-                .publish_text_note(&identity, content, &tags)
+                .publish_text_note(&identity, &*text_note.content, &tags)
                 .unwrap();
             println!("Published text note with id: {}", event.id);
-        }
-        _ => {
-            panic!("Unknown event kind {}", args.kind)
         }
     }
 }
