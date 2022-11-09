@@ -219,24 +219,23 @@ fn main() {
             println!("Message sent to {}, event id: {}", args.pubkey, event.id);
         }
         Commands::DeleteEvent(args) => {
-            let event;
             match &args.reason {
                 Some(reason) => {
-                    event = client
+                    client
                         .lock()
                         .unwrap()
                         .delete_event_with_reason(&identity, args.event_id.as_str(), reason)
                         .unwrap();
                 }
                 None => {
-                    event = client
+                    client
                         .lock()
                         .unwrap()
                         .delete_event(&identity, args.event_id.as_str())
                         .unwrap();
                 }
             }
-            println!("Deleted event {}", &args.event_id);
+            println!("Deleted event with id: {}", &args.event_id);
         }
         Commands::React(args) => {
             if args.reaction.trim().is_empty() {
