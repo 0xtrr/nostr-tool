@@ -33,7 +33,9 @@ enum Commands {
     /// Publish contacts from a CSV file
     PublishContactListCsv(PublishContactListCsv),
     /// Send a direct message
-    SendDirectMessage(SendDirectMessage)
+    SendDirectMessage(SendDirectMessage),
+    /// Delete an event
+    DeleteEvent(DeleteEvent),
 }
 
 #[derive(Args)]
@@ -85,6 +87,16 @@ struct SendDirectMessage {
     /// Message to send
     #[arg(short, long)]
     message: String,
+}
+
+#[derive(Args)]
+struct DeleteEvent {
+    /// Event id to delete
+    #[arg(short, long)]
+    event_id: String,
+    /// Reason for deleting the events
+    #[arg(short, long)]
+    reason: Option<String>,
 }
 
 fn main() {
@@ -173,7 +185,7 @@ fn main() {
                 let clt = nostr_rust::nips::nip2::ContactListTag {
                     key: tag.pubkey,
                     main_relay: tag.relay,
-                    surname: tag.petname
+                    surname: tag.petname,
                 };
                 contacts.push(clt);
             }
@@ -190,6 +202,26 @@ fn main() {
                 .send_private_message(&identity, &args.pubkey.as_str(), &args.message)
                 .unwrap();
             println!("Message sent to {}, event id: {}", args.pubkey, event.id);
+        }
+        Commands::DeleteEvent(args) => {
+            let event;
+            match &args.reason {
+                Some(reason) => {
+                    event = client
+                        .lock()
+                        .unwrap()
+                        .delete_event_with_reason(&identity, args.event_id.as_str(), reason)
+                        .unwrap();
+                }
+                None => {
+                    event = client
+                        .lock()
+                        .unwrap()
+                        .delete_event(&identity, args.event_id.as_str())
+                        .unwrap();
+                }
+            }
+            println!("Deleted event {}", &args.event_id);
         }
     }
 }
