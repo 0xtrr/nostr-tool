@@ -1,12 +1,8 @@
-use std::fs::File;
-use std::io::Read;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use clap::{Args, Parser, Subcommand};
 use nostr_rust::Identity;
 use nostr_rust::nostr_client::Client;
-use secp256k1::{KeyPair, Secp256k1, XOnlyPublicKey};
-use secp256k1::rand::rngs::OsRng;
 use serde::Deserialize;
 
 /// Simple CLI application to interact with nostr
@@ -35,7 +31,9 @@ enum Commands {
     /// Recommend a relay
     RecommendServer(RecommendServer),
     /// Publish contacts from a CSV file
-    PublishContactListCsv(PublishContactListCsv)
+    PublishContactListCsv(PublishContactListCsv),
+    /// Send a direct message
+    SendDirectMessage(SendDirectMessage)
 }
 
 #[derive(Args)]
@@ -77,6 +75,16 @@ struct PublishContactListCsv {
     /// pubkey,relay_url,petname. See example in resources/contact_list.csv
     #[arg(short, long)]
     filepath: String,
+}
+
+#[derive(Args)]
+struct SendDirectMessage {
+    /// Receiver public key
+    #[arg(short, long)]
+    pubkey: String,
+    /// Message to send
+    #[arg(short, long)]
+    message: String,
 }
 
 fn main() {
@@ -174,6 +182,14 @@ fn main() {
                 .unwrap()
                 .set_contact_list(&identity, contacts)
                 .unwrap();
+        }
+        Commands::SendDirectMessage(args) => {
+            let event = client
+                .lock()
+                .unwrap()
+                .send_private_message(&identity, &args.pubkey.as_str(), &args.message)
+                .unwrap();
+            println!("Message sent to {}, event id: {}", args.pubkey, event.id);
         }
     }
 }
