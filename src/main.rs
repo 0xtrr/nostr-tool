@@ -29,6 +29,21 @@ enum Commands {
     UpdateMetadata(UpdateMetadata),
     /// Send text note
     TextNote(TextNote),
+    /// Recommend a relay
+    RecommendServer(RecommendServer)
+}
+
+#[derive(Args)]
+struct UpdateMetadata {
+    /// Profile name
+    #[arg(short, long)]
+    name: Option<String>,
+    /// About
+    #[arg(short, long)]
+    about: Option<String>,
+    /// Picture URL
+    #[arg(short, long)]
+    picture: Option<String>,
 }
 
 #[derive(Args)]
@@ -45,16 +60,10 @@ struct TextNote {
 }
 
 #[derive(Args)]
-struct UpdateMetadata {
-    /// Profile name
+struct RecommendServer {
+    /// Relay URL to recommend
     #[arg(short, long)]
-    name: Option<String>,
-    /// About
-    #[arg(short, long)]
-    about: Option<String>,
-    /// Picture URL
-    #[arg(short, long)]
-    picture: Option<String>,
+    url: String,
 }
 
 fn main() {
@@ -126,6 +135,14 @@ fn main() {
                 .publish_text_note(&identity, &*text_note.content, &tags)
                 .unwrap();
             println!("Published text note with id: {}", event.id);
+        }
+        Commands::RecommendServer(url) => {
+            client
+                .lock()
+                .unwrap()
+                .add_recommended_relay(&identity, url.url.as_str())
+                .unwrap();
+            println!("Relay {} recommended", url.url);
         }
     }
 }
