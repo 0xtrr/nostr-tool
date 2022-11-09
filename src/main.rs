@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::Read;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use clap::{Args, Parser, Subcommand};
@@ -5,6 +7,7 @@ use nostr_rust::Identity;
 use nostr_rust::nostr_client::Client;
 use secp256k1::{KeyPair, Secp256k1, XOnlyPublicKey};
 use secp256k1::rand::rngs::OsRng;
+use serde::Deserialize;
 
 /// Simple CLI application to interact with nostr
 #[derive(Parser)]
@@ -30,7 +33,9 @@ enum Commands {
     /// Send text note
     TextNote(TextNote),
     /// Recommend a relay
-    RecommendServer(RecommendServer)
+    RecommendServer(RecommendServer),
+    /// Publish contacts from a CSV file
+    PublishContactListCsv(PublishContactListCsv)
 }
 
 #[derive(Args)]
@@ -64,6 +69,14 @@ struct RecommendServer {
     /// Relay URL to recommend
     #[arg(short, long)]
     url: String,
+}
+
+#[derive(Args)]
+struct PublishContactListCsv {
+    /// Path to CSV file. CSV file should be have the following format:
+    /// pubkey,relay_url,petname. See example in resources/contact_list.csv
+    #[arg(short, long)]
+    filepath: String,
 }
 
 fn main() {
@@ -144,5 +157,33 @@ fn main() {
                 .unwrap();
             println!("Relay {} recommended", url.url);
         }
+        Commands::PublishContactListCsv(args) => {
+            let mut rdr = csv::Reader::from_path(&args.filepath).unwrap();
+            let mut contacts: Vec<nostr_rust::nips::nip2::ContactListTag> = vec![];
+            for result in rdr.deserialize() {
+                let tag: ContactListTag = result.unwrap();
+                let clt = nostr_rust::nips::nip2::ContactListTag {
+                    key: tag.pubkey,
+                    main_relay: tag.relay,
+                    surname: tag.petname
+                };
+                contacts.push(clt);
+            }
+            client
+                .lock()
+                .unwrap()
+                .set_contact_list(&identity, contacts)
+                .unwrap();
+        }
     }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ContactListTag {
+    /// 32-bytes hex key - the public key of the contact
+    pub pubkey: String,
+    /// main relay URL
+    pub relay: Option<String>,
+    /// Petname
+    pub petname: Option<String>,
 }
