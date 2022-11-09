@@ -36,6 +36,8 @@ enum Commands {
     SendDirectMessage(SendDirectMessage),
     /// Delete an event
     DeleteEvent(DeleteEvent),
+    /// React to an event
+    React(Reaction),
 }
 
 #[derive(Args)]
@@ -97,6 +99,19 @@ struct DeleteEvent {
     /// Reason for deleting the events
     #[arg(short, long)]
     reason: Option<String>,
+}
+
+#[derive(Args)]
+struct Reaction {
+    /// Event id to react to
+    #[arg(short, long)]
+    event_id: String,
+    /// Author pubkey of the event you are reacting to
+    #[arg(short, long)]
+    author_pubkey: String,
+    /// Reaction content. Set to '+' for like or '-' for dislike. Single emojis are also often used for reactions, such as in Damus Web.
+    #[arg(short, long)]
+    reaction: String,
 }
 
 fn main() {
@@ -222,6 +237,17 @@ fn main() {
                 }
             }
             println!("Deleted event {}", &args.event_id);
+        }
+        Commands::React(args) => {
+            if args.reaction.trim().is_empty() {
+                panic!("Reaction does not contain any content")
+            }
+            let event = client
+                .lock()
+                .unwrap()
+                .react_to(&identity, &args.event_id, &args.author_pubkey, &args.reaction)
+                .unwrap();
+            println!("Reacted to {} with {} in event {}", &args.event_id, args.reaction, event.id);
         }
     }
 }
