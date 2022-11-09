@@ -7,10 +7,10 @@ application.
 
 ## Install
 
-Clone the repo and run the following command in the repo folder
+Clone the repo and run the following command in the repo folder. You must have Rust installed to compile this.
 
 ```shell
-cargo install --path .
+cargo build --release
 ```
 
 Run `nostr-tools` command once to get the standard help menu up. Each subcommand also has it's own help menu accessed by appending the --help flag.
