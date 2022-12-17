@@ -1,9 +1,9 @@
+use clap::{Args, Parser, Subcommand};
+use nostr_rust::nostr_client::Client;
+use nostr_rust::Identity;
+use serde::Deserialize;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use clap::{Args, Parser, Subcommand};
-use nostr_rust::Identity;
-use nostr_rust::nostr_client::Client;
-use serde::Deserialize;
 
 /// Simple CLI application to interact with nostr
 #[derive(Parser)]
@@ -20,6 +20,9 @@ struct Cli {
     /// Relay to connect to
     #[arg(short, long, action = clap::ArgAction::Append)]
     relay: Vec<String>,
+    /// Proof of work difficulty target
+    #[arg(short, long, action = clap::ArgAction::Append, default_value_t = 0)]
+    difficulty_target: u16,
 }
 
 #[derive(Subcommand)]
@@ -121,6 +124,7 @@ fn main() {
     if args.relay.is_empty() {
         panic!("No relays specified, one relay is required!")
     }
+
     // Parse and validate private key
     let identity = match args.private_key {
         Some(pk) => {
@@ -132,16 +136,17 @@ fn main() {
             println!("No private key provided, creating new identity");
             let (secret_key, _) = nostr_rust::keys::get_random_secret_key();
             let identity = Identity::from_str(&secret_key.display_secret().to_string()).unwrap();
-            println!("Using new private key {}", identity.secret_key.display_secret().to_string());
+            println!(
+                "Using new private key {}",
+                identity.secret_key.display_secret().to_string()
+            );
             println!("Using new public key {}", identity.public_key.to_string());
             identity
         }
     };
     let str_slice = args.relay.iter().map(String::as_str).collect();
     // Set up relay connection(s)
-    let client = Arc::new(Mutex::new(
-        Client::new(str_slice).unwrap()
-    ));
+    let client = Arc::new(Mutex::new(Client::new(str_slice).unwrap()));
 
     // Post event
     match &args.command {
@@ -162,7 +167,7 @@ fn main() {
             client
                 .lock()
                 .unwrap()
-                .set_metadata(&identity, name, about, picture)
+                .set_metadata(&identity, name, about, picture, args.difficulty_target)
                 .unwrap();
             println!("Metadata updated");
         }
@@ -180,7 +185,7 @@ fn main() {
             let event = client
                 .lock()
                 .unwrap()
-                .publish_text_note(&identity, &*text_note.content, &tags)
+                .publish_text_note(&identity, &text_note.content, &tags, args.difficulty_target)
                 .unwrap();
             println!("Published text note with id: {}", event.id);
         }
@@ -188,12 +193,12 @@ fn main() {
             client
                 .lock()
                 .unwrap()
-                .add_recommended_relay(&identity, url.url.as_str())
+                .add_recommended_relay(&identity, url.url.as_str(), args.difficulty_target)
                 .unwrap();
             println!("Relay {} recommended", url.url);
         }
-        Commands::PublishContactListCsv(args) => {
-            let mut rdr = csv::Reader::from_path(&args.filepath).unwrap();
+        Commands::PublishContactListCsv(command_args) => {
+            let mut rdr = csv::Reader::from_path(&command_args.filepath).unwrap();
             let mut contacts: Vec<nostr_rust::nips::nip2::ContactListTag> = vec![];
             for result in rdr.deserialize() {
                 let tag: ContactListTag = result.unwrap();
@@ -207,46 +212,72 @@ fn main() {
             client
                 .lock()
                 .unwrap()
-                .set_contact_list(&identity, contacts)
+                .set_contact_list(&identity, contacts, args.difficulty_target)
                 .unwrap();
         }
-        Commands::SendDirectMessage(args) => {
+        Commands::SendDirectMessage(command_args) => {
             let event = client
                 .lock()
                 .unwrap()
-                .send_private_message(&identity, &args.pubkey.as_str(), &args.message)
+                .send_private_message(
+                    &identity,
+                    command_args.pubkey.as_str(),
+                    &command_args.message,
+                    args.difficulty_target,
+                )
                 .unwrap();
-            println!("Message sent to {}, event id: {}", args.pubkey, event.id);
+            println!(
+                "Message sent to {}, event id: {}",
+                command_args.pubkey, event.id
+            );
         }
-        Commands::DeleteEvent(args) => {
-            match &args.reason {
+        Commands::DeleteEvent(command_args) => {
+            match &command_args.reason {
                 Some(reason) => {
                     client
                         .lock()
                         .unwrap()
-                        .delete_event_with_reason(&identity, args.event_id.as_str(), reason)
+                        .delete_event_with_reason(
+                            &identity,
+                            command_args.event_id.as_str(),
+                            reason,
+                            args.difficulty_target,
+                        )
                         .unwrap();
                 }
                 None => {
                     client
                         .lock()
                         .unwrap()
-                        .delete_event(&identity, args.event_id.as_str())
+                        .delete_event(
+                            &identity,
+                            command_args.event_id.as_str(),
+                            args.difficulty_target,
+                        )
                         .unwrap();
                 }
             }
-            println!("Deleted event with id: {}", &args.event_id);
+            println!("Deleted event with id: {}", &command_args.event_id);
         }
-        Commands::React(args) => {
-            if args.reaction.trim().is_empty() {
+        Commands::React(command_args) => {
+            if command_args.reaction.trim().is_empty() {
                 panic!("Reaction does not contain any content")
             }
             let event = client
                 .lock()
                 .unwrap()
-                .react_to(&identity, &args.event_id, &args.author_pubkey, &args.reaction)
+                .react_to(
+                    &identity,
+                    &command_args.event_id,
+                    &command_args.author_pubkey,
+                    &command_args.reaction,
+                    args.difficulty_target,
+                )
                 .unwrap();
-            println!("Reacted to {} with {} in event {}", &args.event_id, args.reaction, event.id);
+            println!(
+                "Reacted to {} with {} in event {}",
+                &command_args.event_id, command_args.reaction, event.id
+            );
         }
     }
 }
