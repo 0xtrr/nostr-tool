@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use nostr_rust::nostr_client::Client;
+use nostr_rust::req::ReqFilter;
 use nostr_rust::Identity;
 use serde::Deserialize;
 use std::str::FromStr;
@@ -41,6 +42,8 @@ enum Commands {
     DeleteEvent(DeleteEvent),
     /// React to an event
     React(Reaction),
+    /// Get all events
+    ListEvents(ListEvents),
 }
 
 #[derive(Args)]
@@ -115,6 +118,34 @@ struct Reaction {
     /// Reaction content. Set to '+' for like or '-' for dislike. Single emojis are also often used for reactions, such as in Damus Web.
     #[arg(short, long)]
     reaction: String,
+}
+
+#[derive(Args)]
+struct ListEvents {
+    /// Ids
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    ids: Option<Vec<String>>,
+    /// Authors
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    authors: Option<Vec<String>>,
+    /// Kinds
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    kinds: Option<Vec<u16>>,
+    /// p tag
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    e: Option<Vec<String>>,
+    /// p tag
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    p: Option<Vec<String>>,
+    /// Since
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    since: Option<u64>,
+    /// Until
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    until: Option<u64>,
+    /// Limit
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    limit: Option<u64>,
 }
 
 fn main() {
@@ -278,6 +309,25 @@ fn main() {
                 "Reacted to {} with {} in event {}",
                 &command_args.event_id, command_args.reaction, event.id
             );
+        }
+        Commands::ListEvents(command_args) => {
+            let events = client
+                .lock()
+                .unwrap()
+                .get_events_of(vec![ReqFilter {
+                    ids: command_args.ids.clone(),
+                    authors: command_args.authors.clone(),
+                    kinds: command_args.kinds.clone(),
+                    e: command_args.e.clone(),
+                    p: command_args.p.clone(),
+                    since: command_args.since,
+                    until: command_args.until,
+                    limit: command_args.limit,
+                }])
+                .unwrap();
+            for (i, event) in events.iter().enumerate() {
+                println!("{}: {:#?}", i, event);
+            }
         }
     }
 }
