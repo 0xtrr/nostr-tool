@@ -57,6 +57,8 @@ struct UpdateMetadata {
     /// Picture URL
     #[arg(short, long)]
     picture: Option<String>,
+    #[arg(long)]
+    nip05: Option<String>,
 }
 
 #[derive(Args)]
@@ -159,7 +161,6 @@ fn main() {
     // Parse and validate private key
     let identity = match args.private_key {
         Some(pk) => {
-            println!("Using provided private key");
             let identity = Identity::from_str(pk.as_str()).unwrap();
             identity
         }
@@ -195,12 +196,19 @@ fn main() {
                 Some(picture) => Some(picture.as_str()),
                 None => None,
             };
-            client
+            let nip05 = match &metadata.nip05 {
+                Some(nip05) => Some(nip05.as_str()),
+                None => None,
+            };
+
+            let result = client
                 .lock()
                 .unwrap()
-                .set_metadata(&identity, name, about, picture, args.difficulty_target)
-                .unwrap();
-            println!("Metadata updated");
+                .set_metadata(&identity, name, about, picture, nip05, args.difficulty_target);
+            match result {
+                Ok(event) => println!("Metadata updated ({})", event.id),
+                Err(e) => eprintln!("{}", e)
+            }
         }
         Commands::TextNote(text_note) => {
             // Set up tags
