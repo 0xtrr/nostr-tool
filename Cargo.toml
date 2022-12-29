@@ -2,8 +2,14 @@
 name = "nostr-tool"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "A CLI tool to interact with nostr"
+authors = ["0xtr <oxtrr@protonmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/0xtrr/nostr-tool"
+repository = "https://github.com/0xtrr/nostr-tool"
+license = "MIT"
+keywords = ["nostr", "tool"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 chrono = { version = "0.4.22", features = ["serde"] }
