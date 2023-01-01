@@ -6,7 +6,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/nostr-tool.svg)](https://crates.io/crates/nostr-tool)
 [![crates.io - Downloads](https://img.shields.io/crates/d/nostr-tool)](https://crates.io/crates/nostr-tool)
-[![MIT](https://img.shields.io/crates/l/nostr-tool.svg)](../../LICENSE)
+[![MIT](https://img.shields.io/crates/l/nostr-tool.svg)](LICENSE)
 
 
 
