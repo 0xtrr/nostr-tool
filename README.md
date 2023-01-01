@@ -4,6 +4,12 @@
   <img src="https://user-images.githubusercontent.com/86188777/209737084-492f91bb-1283-4b54-956b-e9816d909d12.png" width="256" title="Nostradamus">
 </p>
 
+[![crates.io](https://img.shields.io/crates/v/nostr-tool.svg)](https://crates.io/crates/nostr-tool)
+[![crates.io - Downloads](https://img.shields.io/crates/d/nostr-tool)](https://crates.io/crates/nostr-tool)
+[![MIT](https://img.shields.io/crates/l/nostr-tool.svg)](../../LICENSE)
+
+
+
 A simple CLI tool to send nostr events.
 
 Currently, this is more of a POC on the use of the [nostr_rust](https://github.com/0xtlt/nostr_rust) library in a CLI
