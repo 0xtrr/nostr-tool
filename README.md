@@ -19,6 +19,12 @@ application.
 
 Clone the repo and run the following command in the repo folder. You must have Rust installed to compile this.
 
+### Install from crates.io
+```shell
+cargo install nostr-tool
+```
+
+### Build from source
 ```shell
 cargo build --release
 ```
