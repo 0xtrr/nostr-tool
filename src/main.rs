@@ -221,20 +221,24 @@ fn main() {
                 let new_tag = vec![String::from("e"), String::from(tag)];
                 tags.push(new_tag);
             }
-            let event = client
+            let result = client
                 .lock()
                 .unwrap()
-                .publish_text_note(&identity, &text_note.content, &tags, args.difficulty_target)
-                .unwrap();
-            println!("Published text note with id: {}", event.id);
+                .publish_text_note(&identity, &text_note.content, &tags, args.difficulty_target);
+            match result {
+                Ok(event) => println!("Published text note with id: {}", event.id),
+                Err(e) => eprintln!("{}", e)
+            }
         }
         Commands::RecommendServer(url) => {
-            client
+            let result = client
                 .lock()
                 .unwrap()
-                .add_recommended_relay(&identity, url.url.as_str(), args.difficulty_target)
-                .unwrap();
-            println!("Relay {} recommended", url.url);
+                .add_recommended_relay(&identity, url.url.as_str(), args.difficulty_target);
+            match result {
+                Ok(_) => println!("Relay {} recommended", url.url),
+                Err(e) => eprintln!("{}", e)
+            }
         }
         Commands::PublishContactListCsv(command_args) => {
             let mut rdr = csv::Reader::from_path(&command_args.filepath).unwrap();
@@ -248,14 +252,17 @@ fn main() {
                 };
                 contacts.push(clt);
             }
-            client
+            let result = client
                 .lock()
                 .unwrap()
-                .set_contact_list(&identity, contacts, args.difficulty_target)
-                .unwrap();
+                .set_contact_list(&identity, contacts, args.difficulty_target);
+            match result {
+                Ok(_) => println!("Contact list imported!"),
+                Err(e) => eprintln!("{}", e)
+            }
         }
         Commands::SendDirectMessage(command_args) => {
-            let event = client
+            let result = client
                 .lock()
                 .unwrap()
                 .send_private_message(
@@ -263,17 +270,19 @@ fn main() {
                     command_args.pubkey.as_str(),
                     &command_args.message,
                     args.difficulty_target,
-                )
-                .unwrap();
-            println!(
-                "Message sent to {}, event id: {}",
-                command_args.pubkey, event.id
-            );
+                );
+             match result {
+                 Ok(event) => println!(
+                     "Message sent to {}, event id: {}",
+                     command_args.pubkey, event.id
+                 ),
+                 Err(e) => eprintln!("{}", e)
+             }
         }
         Commands::DeleteEvent(command_args) => {
             match &command_args.reason {
                 Some(reason) => {
-                    client
+                    let result = client
                         .lock()
                         .unwrap()
                         .delete_event_with_reason(
@@ -281,28 +290,33 @@ fn main() {
                             command_args.event_id.as_str(),
                             reason,
                             args.difficulty_target,
-                        )
-                        .unwrap();
+                        );
+                    match result {
+                        Ok(_) => println!("Deleted event with id: {}", &command_args.event_id),
+                        Err(e) => eprintln!("{}", e)
+                    }
                 }
                 None => {
-                    client
+                    let result = client
                         .lock()
                         .unwrap()
                         .delete_event(
                             &identity,
                             command_args.event_id.as_str(),
                             args.difficulty_target,
-                        )
-                        .unwrap();
+                        );
+                    match result {
+                        Ok(_) => println!("Deleted event with id: {}", &command_args.event_id),
+                        Err(e) => eprintln!("{}", e)
+                    }
                 }
             }
-            println!("Deleted event with id: {}", &command_args.event_id);
         }
         Commands::React(command_args) => {
             if command_args.reaction.trim().is_empty() {
                 panic!("Reaction does not contain any content")
             }
-            let event = client
+            let result = client
                 .lock()
                 .unwrap()
                 .react_to(
@@ -311,15 +325,17 @@ fn main() {
                     &command_args.author_pubkey,
                     &command_args.reaction,
                     args.difficulty_target,
-                )
-                .unwrap();
-            println!(
-                "Reacted to {} with {} in event {}",
-                &command_args.event_id, command_args.reaction, event.id
-            );
+                );
+            match result {
+                Ok(event) => println!(
+                    "Reacted to {} with {} in event {}",
+                    &command_args.event_id, command_args.reaction, event.id
+                ),
+                Err(e) => eprintln!("{}", e)
+            }
         }
         Commands::ListEvents(command_args) => {
-            let events = client
+            let result = client
                 .lock()
                 .unwrap()
                 .get_events_of(vec![ReqFilter {
@@ -331,11 +347,16 @@ fn main() {
                     since: command_args.since,
                     until: command_args.until,
                     limit: command_args.limit,
-                }])
-                .unwrap();
-            for (i, event) in events.iter().enumerate() {
-                println!("{}: {:#?}", i, event);
+                }]);
+            match result {
+                Ok(events) => {
+                    for (i, event) in events.iter().enumerate() {
+                        println!("{}: {:#?}", i, event);
+                    }
+                },
+                Err(e) => eprintln!("{}", e)
             }
+
         }
     }
 }
