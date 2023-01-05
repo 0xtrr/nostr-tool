@@ -154,10 +154,6 @@ fn main() {
     // Parse input
     let args: Cli = Cli::parse();
 
-    if args.relay.is_empty() {
-        panic!("No relays specified, one relay is required!")
-    }
-
     // Parse and validate private key
     let identity = match args.private_key {
         Some(pk) => {
@@ -183,6 +179,10 @@ fn main() {
     // Post event
     match &args.command {
         Commands::UpdateMetadata(metadata) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             // Set metadata
             let name = match &metadata.name {
                 Some(name) => Some(name.as_str()),
@@ -211,6 +211,10 @@ fn main() {
             }
         }
         Commands::TextNote(text_note) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             // Set up tags
             let mut tags: Vec<Vec<String>> = vec![];
             for tag in text_note.ptag.iter() {
@@ -231,6 +235,10 @@ fn main() {
             }
         }
         Commands::RecommendServer(url) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             let result = client
                 .lock()
                 .unwrap()
@@ -241,6 +249,10 @@ fn main() {
             }
         }
         Commands::PublishContactListCsv(command_args) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             let mut rdr = csv::Reader::from_path(&command_args.filepath).unwrap();
             let mut contacts: Vec<nostr_rust::nips::nip2::ContactListTag> = vec![];
             for result in rdr.deserialize() {
@@ -262,6 +274,10 @@ fn main() {
             }
         }
         Commands::SendDirectMessage(command_args) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             let result = client
                 .lock()
                 .unwrap()
@@ -280,6 +296,10 @@ fn main() {
              }
         }
         Commands::DeleteEvent(command_args) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             match &command_args.reason {
                 Some(reason) => {
                     let result = client
@@ -313,6 +333,10 @@ fn main() {
             }
         }
         Commands::React(command_args) => {
+            if args.relay.is_empty() {
+                panic!("No relays specified, at least one relay is required!")
+            }
+
             if command_args.reaction.trim().is_empty() {
                 panic!("Reaction does not contain any content")
             }
@@ -356,7 +380,6 @@ fn main() {
                 },
                 Err(e) => eprintln!("{}", e)
             }
-
         }
     }
 }
