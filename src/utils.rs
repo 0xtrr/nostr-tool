@@ -2,7 +2,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use nostr_rust::Identity;
 use nostr_rust::nostr_client::Client;
-use bech32::FromBase32;
+use bech32::{FromBase32, ToBase32, Variant};
 
 pub fn handle_identity(private_key: Option<String>) -> Identity {
     // Parse and validate private key
@@ -24,14 +24,17 @@ pub fn handle_identity(private_key: Option<String>) -> Identity {
                 Ok(identity) => identity,
                 Err(err) => panic!("Error creating identity: {}", err),
             };
-            println!(
-                "New private key {}",
-                identity.secret_key.display_secret().to_string()
-            );
-            println!("New public key {}", identity.public_key.x_only_public_key().0.to_string());
             identity
         }
     };
+
+    let priv_key = identity.secret_key.clone().display_secret().to_string();
+    let bech32_encoded_private_key = bech32_encode_key(Prefix::Nsec, priv_key);
+
+    let public_key = identity.public_key_str.clone();
+    let bech32_encoded_public_key = bech32_encode_key(Prefix::Npub, public_key);
+    println!("Private key: {}", bech32_encoded_private_key);
+    println!("Public key: {}", bech32_encoded_public_key);
     identity
 }
 
@@ -57,6 +60,25 @@ pub fn parse_key(key: String) -> String {
         // If the key is not bech32 encoded, return it as is
         key
     }
+}
+
+pub enum Prefix {
+    Npub,
+    Nsec
+}
+
+pub fn bech32_encode_key(kind: Prefix, pubkey: String) -> String{
+    let hrp = match kind {
+        Prefix::Npub => "npub",
+        Prefix::Nsec => "nsec",
+    };
+
+    let encoded = bech32::encode(
+        hrp,
+        hex::decode(pubkey).unwrap().to_base32(),
+        Variant::Bech32
+    ).unwrap();
+    encoded
 }
 
 #[cfg(test)]
