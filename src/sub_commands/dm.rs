@@ -2,7 +2,7 @@ use clap::Args;
 
 use ::nostr_tool::utils::handle_identity;
 use ::nostr_tool::utils::create_client;
-use nostr_tool::utils;
+use nostr_tool::utils::{hex_to_bech32, parse_key, Prefix};
 
 #[derive(Args)]
 pub struct SendDirectMessageSubCommand {
@@ -27,8 +27,8 @@ pub fn send(
     let identity = handle_identity(private_key);
     let client = create_client(relays);
 
-    let key_clone = sub_command_args.receiver.clone();
-    let hex_pubkey = utils::parse_key(key_clone);
+    let hex_pubkey = parse_key(sub_command_args.receiver.clone());
+    let receiver_bech32_encoded_pubkey = hex_to_bech32(Prefix::Npub, hex_pubkey.clone());
 
     let result = client
         .lock()
@@ -40,10 +40,13 @@ pub fn send(
             difficulty_target,
         );
     match result {
-        Ok(event) => println!(
-            "Message sent to {}, event id: {}",
-            sub_command_args.receiver, event.id
-        ),
+        Ok(event) => {
+            let bech32_encoded_note_id = hex_to_bech32(Prefix::Note, event.id);
+            println!(
+                "Message sent to {}, event id: {}",
+                receiver_bech32_encoded_pubkey, bech32_encoded_note_id
+            )
+        },
         Err(e) => eprintln!("{}", e)
     }
 }

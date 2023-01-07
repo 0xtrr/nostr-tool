@@ -1,6 +1,6 @@
 use clap::Args;
 
-use nostr_tool::utils::{bech32_encode_key, parse_key, Prefix};
+use nostr_tool::utils::{hex_to_bech32, parse_key, Prefix};
 
 #[derive(Args)]
 pub struct ConvertKeySubCommand {
@@ -25,7 +25,7 @@ pub fn convert_key(sub_command_args: &ConvertKeySubCommand) {
             Some(prefix) => prefix,
             None => panic!("Prefix parameter is missing")
         };
-        let encoded_key = bech32_encode_key(
+        let encoded_key = hex_to_bech32(
             hrp,
             sub_command_args.key.clone()
         );
