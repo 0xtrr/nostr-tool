@@ -7,3 +7,4 @@ pub mod delete_event;
 pub mod react;
 pub mod list_events;
 pub mod generate_keypair;
+pub mod convert_key;

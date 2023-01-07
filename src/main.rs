@@ -41,7 +41,9 @@ enum Commands {
     /// Get all events
     ListEvents(sub_commands::list_events::ListEventsSubCommand),
     /// Generate a new keypair
-    GenerateKeypair(sub_commands::generate_keypair::GenerateKeypairSubCommand)
+    GenerateKeypair(sub_commands::generate_keypair::GenerateKeypairSubCommand),
+    /// Convert key from bech32 to hex or hex to bech32
+    ConvertKey(sub_commands::convert_key::ConvertKeySubCommand),
 }
 
 fn main() {
@@ -116,6 +118,9 @@ fn main() {
             sub_commands::generate_keypair::get_new_keypair(
                 sub_command_args
             )
+        }
+        Commands::ConvertKey(sub_command_args) => {
+            sub_commands::convert_key::convert_key(sub_command_args)
         }
     }
 }

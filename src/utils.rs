@@ -65,6 +65,7 @@ pub fn parse_key(key: String) -> String {
     }
 }
 
+#[derive(clap::ValueEnum, Clone, Debug)]
 pub enum Prefix {
     Npub,
     Nsec
