@@ -2,13 +2,14 @@ use clap::{Args};
 
 use ::nostr_tool::utils::handle_identity;
 use ::nostr_tool::utils::create_client;
+use nostr_tool::utils::parse_key;
 
 #[derive(Args)]
 pub struct ReactionSubCommand {
     /// Event id to react to
     #[arg(short, long)]
     event_id: String,
-    /// Author pubkey of the event you are reacting to
+    /// Author pubkey of the event you are reacting to. Both hex and bech32 encoded keys are supported.
     #[arg(short, long)]
     author_pubkey: String,
     /// Reaction content. Set to '+' for like or '-' for dislike. Single emojis are also often used for reactions, such as in Damus Web.
@@ -32,13 +33,15 @@ pub fn react_to_event(
     if sub_command_args.reaction.trim().is_empty() {
         panic!("Reaction does not contain any content")
     }
+
+    let author_pubkey_hex = parse_key(sub_command_args.author_pubkey.clone());
     let result = client
         .lock()
         .unwrap()
         .react_to(
             &identity,
             &sub_command_args.event_id,
-            &sub_command_args.author_pubkey,
+            author_pubkey_hex.as_str(),
             &sub_command_args.reaction,
             difficulty_target,
         );

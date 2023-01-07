@@ -1,11 +1,12 @@
-use clap::{Args};
+use clap::Args;
 
 use ::nostr_tool::utils::handle_identity;
 use ::nostr_tool::utils::create_client;
+use nostr_tool::utils;
 
 #[derive(Args)]
 pub struct SendDirectMessageSubCommand {
-    /// Receiver public key
+    /// Receiver public key. Both hex and bech32 encoded keys are supported.
     #[arg(short, long)]
     receiver: String,
     /// Message to send
@@ -26,12 +27,15 @@ pub fn send(
     let identity = handle_identity(private_key);
     let client = create_client(relays);
 
+    let key_clone = sub_command_args.receiver.clone();
+    let hex_pubkey = utils::parse_key(key_clone);
+
     let result = client
         .lock()
         .unwrap()
         .send_private_message(
             &identity,
-            sub_command_args.receiver.as_str(),
+            hex_pubkey.as_str(),
             &sub_command_args.message,
             difficulty_target,
         );
