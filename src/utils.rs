@@ -19,12 +19,7 @@ pub fn handle_identity(private_key: Option<String>) -> Identity {
         None => {
             // create a new identity with a new keypair
             println!("No private key provided, creating new identity");
-            let (secret_key, _) = nostr_rust::keys::get_random_secret_key();
-            let identity = match Identity::from_str(&secret_key.display_secret().to_string()) {
-                Ok(identity) => identity,
-                Err(err) => panic!("Error creating identity: {}", err),
-            };
-            identity
+            generate_new_identity()
         }
     };
 
@@ -38,6 +33,14 @@ pub fn handle_identity(private_key: Option<String>) -> Identity {
     identity
 }
 
+pub fn generate_new_identity() -> Identity {
+    let (secret_key, _) = nostr_rust::keys::get_random_secret_key();
+    let identity = match Identity::from_str(&secret_key.display_secret().to_string()) {
+        Ok(identity) => identity,
+        Err(err) => panic!("Error creating identity: {}", err),
+    };
+    identity
+}
 
 pub fn create_client(relays: Vec<String>) -> Arc<Mutex<Client>> {
     // Set up relay connection(s)

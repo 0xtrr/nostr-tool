@@ -40,6 +40,8 @@ enum Commands {
     React(sub_commands::react::ReactionSubCommand),
     /// Get all events
     ListEvents(sub_commands::list_events::ListEventsSubCommand),
+    /// Generate a new keypair
+    GenerateKeypair(sub_commands::generate_keypair::GenerateKeypairSubCommand)
 }
 
 fn main() {
@@ -107,6 +109,11 @@ fn main() {
         Commands::ListEvents(sub_command_args) => {
             sub_commands::list_events::list_events(
                 args.relays,
+                sub_command_args
+            )
+        }
+        Commands::GenerateKeypair(sub_command_args) => {
+            sub_commands::generate_keypair::get_new_keypair(
                 sub_command_args
             )
         }
