@@ -1,4 +1,4 @@
-# Nostr-tools
+# Nostr-tool
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/86188777/209737084-492f91bb-1283-4b54-956b-e9816d909d12.png" width="256" title="Nostradamus">
