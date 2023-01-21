@@ -72,7 +72,7 @@ b2d670de53b27691c0c3400225b65c35a26d06093bcc41f48ffc71e0907f9d4a,"wss://nostr.ox
 ### Send a direct message
 
 ```shell
-nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} send-direct-message --pubkey {RECIPIENT_PUBKEY} --message "Hello World"
+nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} send-direct-message --receiver {RECIPIENT_PUBKEY} --message "Hello World"
 ```
 
 ### Delete an event
