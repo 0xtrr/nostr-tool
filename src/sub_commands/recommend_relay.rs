@@ -1,7 +1,6 @@
-use clap::{Args};
+use clap::Args;
 
-use ::nostr_tool::utils::handle_identity;
-use ::nostr_tool::utils::create_client;
+use crate::utils::{create_client, handle_keys};
 
 #[derive(Args)]
 pub struct RecommendRelaySubCommand {
@@ -13,22 +12,18 @@ pub struct RecommendRelaySubCommand {
 pub fn recommend_relay(
     private_key: Option<String>,
     relays: Vec<String>,
-    difficulty_target: u16,
+    difficulty_target: u8,
     sub_command_args: &RecommendRelaySubCommand,
 ) {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let identity = handle_identity(private_key);
-    let client = create_client(relays);
+    let keys = handle_keys(private_key);
+    let client = create_client(&keys, relays, difficulty_target);
 
-    let result = client
-        .lock()
-        .unwrap()
-        .add_recommended_relay(&identity, sub_command_args.url.as_str(), difficulty_target);
-    match result {
+    match client.add_recommended_relay(sub_command_args.url.clone()) {
         Ok(_) => println!("Relay {} recommended", sub_command_args.url),
-        Err(e) => eprintln!("{}", e)
+        Err(e) => eprintln!("{e}"),
     }
 }

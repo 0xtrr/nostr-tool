@@ -12,13 +12,7 @@ keywords = ["nostr", "tool"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-chrono = { version = "0.4.22", features = ["serde"] }
 clap = { version = "4.0.22", features = ["derive"] }
 serde = { version = "1.0.147", features = ["derive"] }
-tungstenite = "0.17.3"
-secp256k1 = { version = "0.25", features = ["bitcoin_hashes", "global-context", "rand-std"] }
-serde_json = "1.0.87"
-nostr_rust = "0.20.2"
+nostr-sdk = { version = "0.17", features = ["blocking"] }
 csv = "1.1.6"
-bech32 = "0.9.1"
-hex = "0.4.3"
