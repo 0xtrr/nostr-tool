@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use clap::Args;
-use nostr_sdk::prelude::*;
+use nostr_sdk::prelude::{*, Tag};
 
 use crate::utils::{self, create_client, handle_keys};
 
@@ -16,6 +16,9 @@ pub struct TextNoteSubCommand {
     /// Event references
     #[arg(long, action = clap::ArgAction::Append)]
     etag: Vec<String>,
+    /// Seconds till expiration (NIP-40)
+    #[arg(long)]
+    expiration: Option<u64>,
 }
 
 pub fn broadcast_textnote(
@@ -43,9 +46,14 @@ pub fn broadcast_textnote(
         let event_id = EventId::from_hex(etag).expect("Invalid event id");
         tags.push(Tag::Event(event_id, None, None));
     }
+    if let Some(expiration) = sub_command_args.expiration {
+        let new_tag = Tag::Expiration(Timestamp::now().as_u64() + expiration);
+        tags.push(new_tag);
+    }
 
     match client.publish_text_note(sub_command_args.content.clone(), &tags) {
         Ok(id) => println!("Published text note with id: {}", id.to_bech32().unwrap()),
         Err(e) => eprintln!("{e}"),
     }
+
 }
