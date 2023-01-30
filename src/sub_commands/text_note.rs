@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use clap::Args;
-use nostr_sdk::prelude::{*, Tag};
+use nostr_sdk::prelude::{Tag, *};
 
 use crate::utils::{self, create_client, handle_keys};
 
@@ -55,5 +55,4 @@ pub fn broadcast_textnote(
         Ok(id) => println!("Published text note with id: {}", id.to_bech32().unwrap()),
         Err(e) => eprintln!("{e}"),
     }
-
 }
