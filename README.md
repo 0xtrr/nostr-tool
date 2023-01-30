@@ -12,7 +12,7 @@
 
 A simple CLI tool to send nostr events.
 
-Currently, this is more of a POC on the use of the [nostr_rust](https://github.com/0xtlt/nostr_rust) library in a CLI
+Currently, this is more of a POC on the use of the [nostr-sdk](https://github.com/rust-nostr/nostr) library in a CLI
 application.
 
 ## Install

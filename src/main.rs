@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
-pub mod sub_commands;
+mod sub_commands;
+mod utils;
 
 /// Simple CLI application to interact with nostr
 #[derive(Parser)]
@@ -19,7 +20,7 @@ struct Cli {
     relays: Vec<String>,
     /// Proof of work difficulty target
     #[arg(short, long, action = clap::ArgAction::Append, default_value_t = 0)]
-    difficulty_target: u16,
+    difficulty_target: u8,
 }
 
 #[derive(Subcommand)]
@@ -65,7 +66,7 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::RecommendRelay(sub_command_args) => {
@@ -73,7 +74,7 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::PublishContactListCsv(sub_command_args) => {
@@ -81,7 +82,7 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::SendDirectMessage(sub_command_args) => {
@@ -89,7 +90,7 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::DeleteEvent(sub_command_args) => {
@@ -97,7 +98,7 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::React(sub_command_args) => {
@@ -105,19 +106,14 @@ fn main() {
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
-                sub_command_args
+                sub_command_args,
             );
         }
         Commands::ListEvents(sub_command_args) => {
-            sub_commands::list_events::list_events(
-                args.relays,
-                sub_command_args
-            )
+            sub_commands::list_events::list_events(args.relays, sub_command_args)
         }
         Commands::GenerateKeypair(sub_command_args) => {
-            sub_commands::generate_keypair::get_new_keypair(
-                sub_command_args
-            )
+            sub_commands::generate_keypair::get_new_keypair(sub_command_args)
         }
         Commands::ConvertKey(sub_command_args) => {
             sub_commands::convert_key::convert_key(sub_command_args)

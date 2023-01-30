@@ -1,8 +1,9 @@
-use clap::{Args};
+use std::str::FromStr;
 
-use ::nostr_tool::utils::handle_identity;
-use ::nostr_tool::utils::create_client;
-use nostr_tool::utils::parse_key;
+use clap::Args;
+use nostr_sdk::prelude::*;
+
+use crate::utils::{create_client, handle_keys, parse_key};
 
 #[derive(Args)]
 pub struct ReactionSubCommand {
@@ -20,36 +21,31 @@ pub struct ReactionSubCommand {
 pub fn react_to_event(
     private_key: Option<String>,
     relays: Vec<String>,
-    difficulty_target: u16,
-    sub_command_args: &ReactionSubCommand
+    difficulty_target: u8,
+    sub_command_args: &ReactionSubCommand,
 ) {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let identity = handle_identity(private_key);
-    let client = create_client(relays);
+    let keys = handle_keys(private_key);
+    let client = create_client(&keys, relays, difficulty_target);
 
     if sub_command_args.reaction.trim().is_empty() {
         panic!("Reaction does not contain any content")
     }
 
+    let event_id = EventId::from_hex(&sub_command_args.event_id).expect("Invalid event id");
     let author_pubkey_hex = parse_key(sub_command_args.author_pubkey.clone());
-    let result = client
-        .lock()
-        .unwrap()
-        .react_to(
-            &identity,
-            &sub_command_args.event_id,
-            author_pubkey_hex.as_str(),
-            &sub_command_args.reaction,
-            difficulty_target,
-        );
-    match result {
-        Ok(event) => println!(
+    let pubkey = XOnlyPublicKey::from_str(&author_pubkey_hex).expect("Invalid event id");
+
+    match client.reaction(event_id, pubkey, sub_command_args.reaction.clone()) {
+        Ok(id) => println!(
             "Reacted to {} with {} in event {}",
-            &sub_command_args.event_id, sub_command_args.reaction, event.id
+            event_id.to_bech32().unwrap(),
+            sub_command_args.reaction,
+            id.to_bech32().unwrap()
         ),
-        Err(e) => eprintln!("{}", e)
+        Err(e) => eprintln!("{e}"),
     }
 }

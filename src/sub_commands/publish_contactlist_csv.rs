@@ -1,8 +1,10 @@
-use clap::{Args};
+use std::str::FromStr;
+
+use clap::Args;
+use nostr_sdk::prelude::*;
 use serde::Deserialize;
 
-use ::nostr_tool::utils::handle_identity;
-use ::nostr_tool::utils::create_client;
+use crate::utils::{create_client, handle_keys};
 
 #[derive(Args)]
 pub struct PublishContactListCsvSubCommand {
@@ -26,33 +28,29 @@ pub struct ContactListTag {
 pub fn publish_contact_list_from_csv_file(
     private_key: Option<String>,
     relays: Vec<String>,
-    difficulty_target: u16,
-    sub_command_args: &PublishContactListCsvSubCommand
+    difficulty_target: u8,
+    sub_command_args: &PublishContactListCsvSubCommand,
 ) {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let identity = handle_identity(private_key);
-    let client = create_client(relays);
+    let keys = handle_keys(private_key);
+    let client = create_client(&keys, relays, difficulty_target);
 
     let mut rdr = csv::Reader::from_path(&sub_command_args.filepath).unwrap();
-    let mut contacts: Vec<nostr_rust::nips::nip2::ContactListTag> = vec![];
+    let mut contacts: Vec<Contact> = vec![];
     for result in rdr.deserialize() {
         let tag: ContactListTag = result.unwrap();
-        let clt = nostr_rust::nips::nip2::ContactListTag {
-            key: tag.pubkey,
-            main_relay: tag.relay,
-            surname: tag.petname,
+        let clt = Contact {
+            pk: XOnlyPublicKey::from_str(&tag.pubkey).expect("Invalid public key"),
+            relay_url: tag.relay,
+            alias: tag.petname,
         };
         contacts.push(clt);
     }
-    let result = client
-        .lock()
-        .unwrap()
-        .set_contact_list(&identity, contacts, difficulty_target);
-    match result {
+    match client.set_contact_list(contacts) {
         Ok(_) => println!("Contact list imported!"),
-        Err(e) => eprintln!("{}", e)
+        Err(e) => eprintln!("{e}"),
     }
 }
