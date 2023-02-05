@@ -90,7 +90,9 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     match result {
         Ok(events) => {
             for (i, event) in events.iter().enumerate() {
-                println!("{i}: {event:#?}");
+                if let Ok(e) = serde_json::to_string_pretty(event) {
+                    println!("{}: {:#}", i, e)
+                }
             }
         }
         Err(e) => eprintln!("{e}"),
