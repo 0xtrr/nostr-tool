@@ -74,24 +74,27 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         ),
     };
 
-    let result = client.get_events_of(vec![SubscriptionFilter {
-        ids: sub_command_args.ids.clone(),
-        authors: authors,
-        kinds: kinds,
-        events: events,
-        pubkeys: pubkeys,
-        hashtags: None,
-        references: None,
-        search: None,
-        since: sub_command_args.since.map(Timestamp::from),
-        until: sub_command_args.until.map(Timestamp::from),
-        limit: sub_command_args.limit,
-    }]);
+    let result = client.get_events_of(
+        vec![SubscriptionFilter {
+            ids: sub_command_args.ids.clone(),
+            authors,
+            kinds,
+            events,
+            pubkeys,
+            hashtags: None,
+            references: None,
+            search: None,
+            since: sub_command_args.since.map(Timestamp::from),
+            until: sub_command_args.until.map(Timestamp::from),
+            limit: sub_command_args.limit,
+        }],
+        None,
+    );
     match result {
         Ok(events) => {
             for (i, event) in events.iter().enumerate() {
                 if let Ok(e) = serde_json::to_string_pretty(event) {
-                    println!("{}: {:#}", i, e)
+                    println!("{i}: {e:#}")
                 }
             }
         }

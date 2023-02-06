@@ -1,7 +1,9 @@
+use std::ops::Add;
 use std::str::FromStr;
+use std::time::Duration;
 
 use clap::Args;
-use nostr_sdk::prelude::{Tag, *};
+use nostr_sdk::prelude::*;
 
 use crate::utils::{self, create_client, handle_keys};
 
@@ -47,8 +49,8 @@ pub fn broadcast_textnote(
         tags.push(Tag::Event(event_id, None, None));
     }
     if let Some(expiration) = sub_command_args.expiration {
-        let new_tag = Tag::Expiration(Timestamp::now().as_u64() + expiration);
-        tags.push(new_tag);
+        let timestamp = Timestamp::now().add(Duration::from_secs(expiration));
+        tags.push(Tag::Expiration(timestamp));
     }
 
     match client.publish_text_note(sub_command_args.content.clone(), &tags) {
