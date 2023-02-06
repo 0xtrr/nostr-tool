@@ -8,3 +8,4 @@ pub mod react;
 pub mod recommend_relay;
 pub mod text_note;
 pub mod update_metadata;
+pub mod vanity;
