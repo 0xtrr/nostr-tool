@@ -71,7 +71,7 @@ pub fn update_metadata(
         metadata = metadata.lud06(lud06);
     }
 
-    match client.update_profile(metadata) {
+    match client.set_metadata(metadata) {
         Ok(id) => {
             println!("Metadata updated ({})", id.to_bech32().unwrap())
         }
