@@ -8,19 +8,14 @@ pub struct GenerateKeypairSubCommand {
     print_hex: bool,
 }
 
-pub fn get_new_keypair(sub_command_args: &GenerateKeypairSubCommand) {
+pub fn get_new_keypair(sub_command_args: &GenerateKeypairSubCommand) -> Result<()> {
     let keys = Keys::generate();
     if sub_command_args.print_hex {
-        println!(
-            "Private key: {}",
-            keys.secret_key().unwrap().display_secret()
-        );
+        println!("Private key: {}", keys.secret_key()?.display_secret());
         println!("Public key: {}", keys.public_key())
     } else {
-        println!(
-            "Private key: {}",
-            keys.secret_key().unwrap().to_bech32().unwrap()
-        );
-        println!("Public key: {}", keys.public_key().to_bech32().unwrap());
+        println!("Private key: {}", keys.secret_key()?.to_bech32()?);
+        println!("Public key: {}", keys.public_key().to_bech32()?);
     }
+    Ok(())
 }

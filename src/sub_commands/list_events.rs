@@ -33,68 +33,60 @@ pub struct ListEventsSubCommand {
     limit: Option<usize>,
 }
 
-pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) {
+pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let client = create_client(&Keys::generate(), relays, 0);
+    let client = create_client(&Keys::generate(), relays, 0)?;
 
-    let authors: Option<Vec<XOnlyPublicKey>> = match &sub_command_args.authors {
-        None => None,
-        Some(auths) => Some(
-            auths
-                .iter()
-                .map(|a| XOnlyPublicKey::from_str(a.as_str()).expect("Invalid public key"))
-                .collect(),
-        ),
-    };
+    let authors: Option<Vec<XOnlyPublicKey>> = sub_command_args.authors.as_ref().map(|auths| {
+        auths
+            .iter()
+            .map(|a| XOnlyPublicKey::from_str(a.as_str()).expect("Invalid public key"))
+            .collect()
+    });
 
-    let kinds: Option<Vec<Kind>> = match &sub_command_args.kinds {
-        None => None,
-        Some(kinds) => Some(kinds.iter().map(|k| Kind::from(*k)).collect()),
-    };
+    let kinds: Option<Vec<Kind>> = sub_command_args
+        .kinds
+        .as_ref()
+        .map(|kinds| kinds.iter().map(|k| Kind::from(*k)).collect());
 
-    let events: Option<Vec<EventId>> = match &sub_command_args.e {
-        None => None,
-        Some(events) => Some(
-            events
-                .iter()
-                .map(|e| EventId::from_hex(e.as_str()).expect("Invalid event id"))
-                .collect(),
-        ),
-    };
+    let events: Option<Vec<EventId>> = sub_command_args.e.as_ref().map(|events| {
+        events
+            .iter()
+            .map(|e| EventId::from_hex(e.as_str()).expect("Invalid event id"))
+            .collect()
+    });
 
-    let pubkeys: Option<Vec<XOnlyPublicKey>> = match &sub_command_args.p {
-        None => None,
-        Some(pubs) => Some(
-            pubs.iter()
-                .map(|p| XOnlyPublicKey::from_str(p.as_str()).expect("Invalid public key"))
-                .collect(),
-        ),
-    };
+    let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.p.as_ref().map(|pubs| {
+        pubs.iter()
+            .map(|p| XOnlyPublicKey::from_str(p.as_str()).expect("Invalid public key"))
+            .collect()
+    });
 
-    let result = client.get_events_of(vec![SubscriptionFilter {
-        ids: sub_command_args.ids.clone(),
-        authors: authors,
-        kinds: kinds,
-        events: events,
-        pubkeys: pubkeys,
-        hashtags: None,
-        references: None,
-        search: None,
-        since: sub_command_args.since.map(Timestamp::from),
-        until: sub_command_args.until.map(Timestamp::from),
-        limit: sub_command_args.limit,
-    }]);
-    match result {
-        Ok(events) => {
-            for (i, event) in events.iter().enumerate() {
-                if let Ok(e) = serde_json::to_string_pretty(event) {
-                    println!("{}: {:#}", i, e)
-                }
-            }
+    let events: Vec<Event> = client.get_events_of(
+        vec![SubscriptionFilter {
+            ids: sub_command_args.ids.clone(),
+            authors,
+            kinds,
+            events,
+            pubkeys,
+            hashtags: None,
+            references: None,
+            search: None,
+            since: sub_command_args.since.map(Timestamp::from),
+            until: sub_command_args.until.map(Timestamp::from),
+            limit: sub_command_args.limit,
+        }],
+        None,
+    )?;
+
+    for (i, event) in events.iter().enumerate() {
+        if let Ok(e) = serde_json::to_string_pretty(event) {
+            println!("{i}: {e:#}")
         }
-        Err(e) => eprintln!("{e}"),
     }
+
+    Ok(())
 }

@@ -1,9 +1,11 @@
+use std::ops::Add;
 use std::str::FromStr;
+use std::time::Duration;
 
 use clap::Args;
-use nostr_sdk::prelude::{Tag, *};
+use nostr_sdk::prelude::*;
 
-use crate::utils::{self, create_client, handle_keys};
+use crate::utils::{create_client, handle_keys, parse_key};
 
 #[derive(Args)]
 pub struct TextNoteSubCommand {
@@ -26,33 +28,33 @@ pub fn broadcast_textnote(
     relays: Vec<String>,
     difficulty_target: u8,
     sub_command_args: &TextNoteSubCommand,
-) {
+) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key);
-    let client = create_client(&keys, relays, difficulty_target);
+    let keys = handle_keys(private_key)?;
+    let client = create_client(&keys, relays, difficulty_target)?;
 
     // Set up tags
     let mut tags: Vec<Tag> = vec![];
     for ptag in sub_command_args.ptag.iter() {
         // Parse pubkey to ensure we're sending hex keys
-        let pubkey_hex = utils::parse_key(ptag.clone());
-        let pubkey = XOnlyPublicKey::from_str(&pubkey_hex).expect("Invalid public key");
+        let pubkey_hex = parse_key(ptag.clone())?;
+        let pubkey = XOnlyPublicKey::from_str(&pubkey_hex)?;
         tags.push(Tag::PubKey(pubkey, None));
     }
     for etag in sub_command_args.etag.iter() {
-        let event_id = EventId::from_hex(etag).expect("Invalid event id");
+        let event_id = EventId::from_hex(etag)?;
         tags.push(Tag::Event(event_id, None, None));
     }
     if let Some(expiration) = sub_command_args.expiration {
-        let new_tag = Tag::Expiration(Timestamp::now().as_u64() + expiration);
-        tags.push(new_tag);
+        let timestamp = Timestamp::now().add(Duration::from_secs(expiration));
+        tags.push(Tag::Expiration(timestamp));
     }
 
-    match client.publish_text_note(sub_command_args.content.clone(), &tags) {
-        Ok(id) => println!("Published text note with id: {}", id.to_bech32().unwrap()),
-        Err(e) => eprintln!("{e}"),
-    }
+    let event_id = client.publish_text_note(sub_command_args.content.clone(), &tags)?;
+    println!("Published text note with id: {}", event_id.to_bech32()?);
+
+    Ok(())
 }

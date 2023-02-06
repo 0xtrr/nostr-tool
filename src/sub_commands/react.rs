@@ -23,29 +23,28 @@ pub fn react_to_event(
     relays: Vec<String>,
     difficulty_target: u8,
     sub_command_args: &ReactionSubCommand,
-) {
+) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key);
-    let client = create_client(&keys, relays, difficulty_target);
+    let keys = handle_keys(private_key)?;
+    let client = create_client(&keys, relays, difficulty_target)?;
 
     if sub_command_args.reaction.trim().is_empty() {
         panic!("Reaction does not contain any content")
     }
 
-    let event_id = EventId::from_hex(&sub_command_args.event_id).expect("Invalid event id");
-    let author_pubkey_hex = parse_key(sub_command_args.author_pubkey.clone());
-    let pubkey = XOnlyPublicKey::from_str(&author_pubkey_hex).expect("Invalid event id");
+    let event_id = EventId::from_hex(&sub_command_args.event_id)?;
+    let author_pubkey_hex = parse_key(sub_command_args.author_pubkey.clone())?;
+    let pubkey = XOnlyPublicKey::from_str(&author_pubkey_hex)?;
 
-    match client.reaction(event_id, pubkey, sub_command_args.reaction.clone()) {
-        Ok(id) => println!(
-            "Reacted to {} with {} in event {}",
-            event_id.to_bech32().unwrap(),
-            sub_command_args.reaction,
-            id.to_bech32().unwrap()
-        ),
-        Err(e) => eprintln!("{e}"),
-    }
+    let id = client.reaction(event_id, pubkey, sub_command_args.reaction.clone())?;
+    println!(
+        "Reacted to {} with {} in event {}",
+        event_id.to_bech32()?,
+        sub_command_args.reaction,
+        id.to_bech32()?
+    );
+    Ok(())
 }
