@@ -30,27 +30,27 @@ pub fn publish_contact_list_from_csv_file(
     relays: Vec<String>,
     difficulty_target: u8,
     sub_command_args: &PublishContactListCsvSubCommand,
-) {
+) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key);
-    let client = create_client(&keys, relays, difficulty_target);
+    let keys = handle_keys(private_key)?;
+    let client = create_client(&keys, relays, difficulty_target)?;
 
-    let mut rdr = csv::Reader::from_path(&sub_command_args.filepath).unwrap();
+    let mut rdr = csv::Reader::from_path(&sub_command_args.filepath)?;
     let mut contacts: Vec<Contact> = vec![];
     for result in rdr.deserialize() {
-        let tag: ContactListTag = result.unwrap();
+        let tag: ContactListTag = result?;
         let clt = Contact {
-            pk: XOnlyPublicKey::from_str(&tag.pubkey).expect("Invalid public key"),
+            pk: XOnlyPublicKey::from_str(&tag.pubkey)?,
             relay_url: tag.relay,
             alias: tag.petname,
         };
         contacts.push(clt);
     }
-    match client.set_contact_list(contacts) {
-        Ok(_) => println!("Contact list imported!"),
-        Err(e) => eprintln!("{e}"),
-    }
+
+    client.set_contact_list(contacts)?;
+    println!("Contact list imported!");
+    Ok(())
 }

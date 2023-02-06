@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use nostr_sdk::Result;
 
 mod sub_commands;
 mod utils;
@@ -47,7 +48,7 @@ enum Commands {
     ConvertKey(sub_commands::convert_key::ConvertKeySubCommand),
 }
 
-fn main() {
+fn main() -> Result<()> {
     // Parse input
     let args: Cli = Cli::parse();
 

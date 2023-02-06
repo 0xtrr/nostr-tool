@@ -33,12 +33,12 @@ pub struct ListEventsSubCommand {
     limit: Option<usize>,
 }
 
-pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) {
+pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let client = create_client(&Keys::generate(), relays, 0);
+    let client = create_client(&Keys::generate(), relays, 0)?;
 
     let authors: Option<Vec<XOnlyPublicKey>> = sub_command_args.authors.as_ref().map(|auths| {
         auths
@@ -65,7 +65,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             .collect()
     });
 
-    let result = client.get_events_of(
+    let events: Vec<Event> = client.get_events_of(
         vec![SubscriptionFilter {
             ids: sub_command_args.ids.clone(),
             authors,
@@ -80,15 +80,13 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             limit: sub_command_args.limit,
         }],
         None,
-    );
-    match result {
-        Ok(events) => {
-            for (i, event) in events.iter().enumerate() {
-                if let Ok(e) = serde_json::to_string_pretty(event) {
-                    println!("{i}: {e:#}")
-                }
-            }
+    )?;
+
+    for (i, event) in events.iter().enumerate() {
+        if let Ok(e) = serde_json::to_string_pretty(event) {
+            println!("{i}: {e:#}")
         }
-        Err(e) => eprintln!("{e}"),
     }
+
+    Ok(())
 }
