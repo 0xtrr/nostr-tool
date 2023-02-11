@@ -48,6 +48,8 @@ enum Commands {
     ConvertKey(sub_commands::convert_key::ConvertKeySubCommand),
     /// Vanity public key mining
     Vanity(sub_commands::vanity::VanitySubCommand),
+    /// Create a new public channel
+    CreatePublicChannel(sub_commands::create_public_channel::CreatePublicChannelSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -114,5 +116,11 @@ fn main() -> Result<()> {
             sub_commands::convert_key::convert_key(sub_command_args)
         }
         Commands::Vanity(sub_command_args) => sub_commands::vanity::vanity(sub_command_args),
+        Commands::CreatePublicChannel(sub_command_args) => sub_commands::create_public_channel::create_public_channel(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        )
     }
 }

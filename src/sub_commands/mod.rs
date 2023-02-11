@@ -9,3 +9,4 @@ pub mod recommend_relay;
 pub mod text_note;
 pub mod update_metadata;
 pub mod vanity;
+pub mod create_public_channel;
