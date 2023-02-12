@@ -50,6 +50,8 @@ enum Commands {
     Vanity(sub_commands::vanity::VanitySubCommand),
     /// Create a new public channel
     CreatePublicChannel(sub_commands::create_public_channel::CreatePublicChannelSubCommand),
+    /// Update channel metadata
+    SetChannelMetadata(sub_commands::set_channel_metadata::SetChannelMetadataSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -66,12 +68,14 @@ fn main() -> Result<()> {
                 sub_command_args,
             )
         }
-        Commands::TextNote(sub_command_args) => sub_commands::text_note::broadcast_textnote(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
+        Commands::TextNote(sub_command_args) => { 
+            sub_commands::text_note::broadcast_textnote(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
         Commands::RecommendRelay(sub_command_args) => {
             sub_commands::recommend_relay::recommend_relay(
                 args.private_key,
@@ -88,26 +92,35 @@ fn main() -> Result<()> {
                 sub_command_args,
             )
         }
-        Commands::SendDirectMessage(sub_command_args) => sub_commands::dm::send(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
-        Commands::DeleteEvent(sub_command_args) => sub_commands::delete_event::delete(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
-        Commands::React(sub_command_args) => sub_commands::react::react_to_event(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
+        Commands::SendDirectMessage(sub_command_args) => {
+            sub_commands::dm::send(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::DeleteEvent(sub_command_args) => {
+            sub_commands::delete_event::delete(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::React(sub_command_args) => {
+            sub_commands::react::react_to_event(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
         Commands::ListEvents(sub_command_args) => {
-            sub_commands::list_events::list_events(args.relays, sub_command_args)
+            sub_commands::list_events::list_events(
+                args.relays,
+                sub_command_args
+            )
         }
         Commands::GenerateKeypair(sub_command_args) => {
             sub_commands::generate_keypair::get_new_keypair(sub_command_args)
@@ -115,12 +128,25 @@ fn main() -> Result<()> {
         Commands::ConvertKey(sub_command_args) => {
             sub_commands::convert_key::convert_key(sub_command_args)
         }
-        Commands::Vanity(sub_command_args) => sub_commands::vanity::vanity(sub_command_args),
-        Commands::CreatePublicChannel(sub_command_args) => sub_commands::create_public_channel::create_public_channel(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        )
+        Commands::Vanity(sub_command_args) => {
+            sub_commands::vanity::vanity(sub_command_args)
+        }
+        Commands::CreatePublicChannel(sub_command_args) => {
+            sub_commands::create_public_channel::create_public_channel(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::SetChannelMetadata(sub_command_args) => {
+            sub_commands::set_channel_metadata::set_channel_metadata(
+                args.private_key, 
+                args.relays,
+                args.difficulty_target,
+                sub_command_args
+            )
+        }
+
     }
 }

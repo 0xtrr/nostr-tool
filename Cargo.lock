@@ -714,6 +714,7 @@ dependencies = [
 name = "nostr-tool"
 version = "0.2.0"
 dependencies = [
+ "bitcoin",
  "clap",
  "csv",
  "nostr-sdk",
