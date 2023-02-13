@@ -52,6 +52,8 @@ enum Commands {
     CreatePublicChannel(sub_commands::create_public_channel::CreatePublicChannelSubCommand),
     /// Update channel metadata
     SetChannelMetadata(sub_commands::set_channel_metadata::SetChannelMetadataSubCommand),
+    /// Send a message to a public channel
+    SendChannelMessage(sub_commands::send_channel_message::SendChannelMessageSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -144,6 +146,14 @@ fn main() -> Result<()> {
                 args.private_key, 
                 args.relays,
                 args.difficulty_target,
+                sub_command_args
+            )
+        }
+        Commands::SendChannelMessage(sub_command_args) => {
+            sub_commands::send_channel_message::send_channel_message(
+                args.private_key,
+                args.relays, 
+                args.difficulty_target, 
                 sub_command_args
             )
         }
