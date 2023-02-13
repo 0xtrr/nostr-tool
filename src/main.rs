@@ -54,6 +54,8 @@ enum Commands {
     SetChannelMetadata(sub_commands::set_channel_metadata::SetChannelMetadataSubCommand),
     /// Send a message to a public channel
     SendChannelMessage(sub_commands::send_channel_message::SendChannelMessageSubCommand),
+    /// Hide a message in a public chat room
+    HidePublicChannelMessage(sub_commands::hide_public_channel_message::HidePublicChannelMessageSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -157,6 +159,13 @@ fn main() -> Result<()> {
                 sub_command_args
             )
         }
-
+        Commands::HidePublicChannelMessage(sub_command_args) => {
+            sub_commands::hide_public_channel_message::hide_public_channel_message(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args
+            )
+        }
     }
 }
