@@ -56,6 +56,8 @@ enum Commands {
     SendChannelMessage(sub_commands::send_channel_message::SendChannelMessageSubCommand),
     /// Hide a message in a public chat room
     HidePublicChannelMessage(sub_commands::hide_public_channel_message::HidePublicChannelMessageSubCommand),
+    /// Mute a public key
+    MutePublicKey(sub_commands::mute_publickey::MutePublickeySubCommand),
 }
 
 fn main() -> Result<()> {
@@ -161,6 +163,14 @@ fn main() -> Result<()> {
         }
         Commands::HidePublicChannelMessage(sub_command_args) => {
             sub_commands::hide_public_channel_message::hide_public_channel_message(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args
+            )
+        }
+        Commands::MutePublicKey(sub_command_args) => {
+            sub_commands::mute_publickey::mute_publickey(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,

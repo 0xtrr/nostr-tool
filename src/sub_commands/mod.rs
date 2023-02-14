@@ -13,3 +13,4 @@ pub mod create_public_channel;
 pub mod set_channel_metadata;
 pub mod send_channel_message;
 pub mod hide_public_channel_message;
+pub mod mute_publickey;
