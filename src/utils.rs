@@ -41,6 +41,8 @@ pub fn parse_key(key: String) -> Result<String> {
         SecretKey::from_bech32(key)?.display_secret().to_string()
     } else if key.starts_with("note") {
         EventId::from_bech32(key)?.to_hex()
+    } else if key.starts_with("nchannel") {
+        ChannelId::from_bech32(key)?.to_hex()
     } else {
         // If the key is not bech32 encoded, return it as is
         key
@@ -53,6 +55,7 @@ pub enum Prefix {
     Npub,
     Nsec,
     Note,
+    Nchannel,
 }
 
 #[cfg(test)]

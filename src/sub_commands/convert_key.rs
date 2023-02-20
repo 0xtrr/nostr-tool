@@ -19,19 +19,21 @@ pub struct ConvertKeySubCommand {
 }
 
 pub fn convert_key(sub_command_args: &ConvertKeySubCommand) -> Result<()> {
+    let unknown_key = &sub_command_args.key.clone();
+    let hex_key = parse_key(unknown_key.to_string())?;
+
     if sub_command_args.to_hex {
-        let hex_key = &sub_command_args.key.clone();
-        let parsed_key = parse_key(hex_key.to_string())?;
-        println!("{parsed_key}");
+        println!("{hex_key}");
     } else {
         let encoded_key: String = match sub_command_args
             .prefix
             .as_ref()
             .expect("Prefix parameter is missing")
         {
-            Prefix::Npub => XOnlyPublicKey::from_str(&sub_command_args.key)?.to_bech32()?,
-            Prefix::Nsec => SecretKey::from_str(&sub_command_args.key)?.to_bech32()?,
-            Prefix::Note => EventId::from_hex(&sub_command_args.key)?.to_bech32()?,
+            Prefix::Npub => XOnlyPublicKey::from_str(hex_key.as_str())?.to_bech32()?,
+            Prefix::Nsec => SecretKey::from_str(hex_key.as_str())?.to_bech32()?,
+            Prefix::Note => EventId::from_hex(hex_key)?.to_bech32()?,
+            Prefix::Nchannel => ChannelId::from_hex(hex_key)?.to_bech32()?,
         };
         println!("{encoded_key}");
     }

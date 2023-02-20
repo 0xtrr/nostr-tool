@@ -1,6 +1,5 @@
 use clap::Args;
 use nostr_sdk::prelude::*;
-
 use crate::utils::{create_client, handle_keys};
 
 #[derive(Args)]
@@ -57,8 +56,11 @@ pub fn create_public_channel(
         println!("Picture: {}", picture.as_str());
     }
     
-    println!("Bech32 id: {}", event_id.to_bech32()?);
+    println!("Nchannel id: {}", ChannelId::from_hex(&event_id.to_hex())?.to_bech32()?);
+    println!("Bech32 note id: {}", event_id.to_bech32()?);
     println!("Hex id: {}", event_id.to_hex());
 
     Ok(())
 }
+
+
