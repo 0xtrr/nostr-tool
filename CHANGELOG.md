@@ -3,13 +3,16 @@
 ## 0.3.0 - TBD
 
 ### Added
-- Big rewrite by [@yukibtc](https://github.com/yukibtc) to replace nostr_rust with [nostr-sdk](https://github.com/rust-nostr/nostr).
 - NIP-28 support.
 - Add expiration tag to text-note by [@thesimplekid](https://github.com/thesimplekid).
 - Add Dockerfile by [@bijeebuss](https://github.com/bijeebuss).
 - Add .devcontainer by [@bijeebuss](https://github.com/bijeebuss).
 - Add encoding/decoding of nprofile strings
 - Add NIP-14 (subject tags) support to text notes
+
+### Changed
+- Upgrade dependency Clap from 4.0.22 to 4.1.6.
+- Big rewrite by [@yukibtc](https://github.com/yukibtc) to replace nostr_rust with [nostr-sdk](https://github.com/rust-nostr/nostr).
 
 ### Fixed
 - Update typo in examples in Readme by [@gourcetools](https://github.com/gourcetools).
