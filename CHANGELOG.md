@@ -6,6 +6,8 @@
 - Big rewrite by [@yukibtc](https://github.com/yukibtc) to replace nostr_rust with [nostr-sdk](https://github.com/rust-nostr/nostr).
 - NIP-28 support.
 - Add expiration tag to text-note by [@thesimplekid](https://github.com/thesimplekid).
+- Add Dockerfile by [@bijeebuss](https://github.com/bijeebuss).
+- Add .devcontainer by [@bijeebuss](https://github.com/bijeebuss).
 
 ### Fixed
 - Update typo in examples in Readme by [@gourcetools](https://github.com/gourcetools).
