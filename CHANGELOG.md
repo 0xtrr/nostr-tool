@@ -9,10 +9,12 @@
 - Add .devcontainer by [@bijeebuss](https://github.com/bijeebuss).
 - Add encoding/decoding of nprofile strings
 - Add NIP-14 (subject tags) support to text notes
+- Add support for encoding/decoding bech32 encoded nchannel ids
 
 ### Changed
 - Upgrade dependency Clap from 4.0.22 to 4.1.6.
 - Big rewrite by [@yukibtc](https://github.com/yukibtc) to replace nostr_rust with [nostr-sdk](https://github.com/rust-nostr/nostr).
+- Print nchannel id when creating new public channel
 
 ### Fixed
 - Update typo in examples in Readme by [@gourcetools](https://github.com/gourcetools).
