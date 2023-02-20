@@ -30,9 +30,13 @@ cargo install nostr-tool
 cargo build --release
 ```
 
-### Build with Docker
+### Build with Docker locally
 ```shell
 docker build -t nostr-tool .
+```
+### Build with Docker from DockerHub
+```shell
+docker pull 0xtr/nostr-tool:0.3.0
 ```
 
 Run `nostr-tools` command once to get the standard help menu up. Each subcommand also has it's own help menu accessed by appending the --help flag.
