@@ -8,6 +8,7 @@
 - Add expiration tag to text-note by [@thesimplekid](https://github.com/thesimplekid).
 - Add Dockerfile by [@bijeebuss](https://github.com/bijeebuss).
 - Add .devcontainer by [@bijeebuss](https://github.com/bijeebuss).
+- Add encoding/decoding of nprofile strings
 
 ### Fixed
 - Update typo in examples in Readme by [@gourcetools](https://github.com/gourcetools).
