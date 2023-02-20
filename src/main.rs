@@ -58,6 +58,8 @@ enum Commands {
     HidePublicChannelMessage(sub_commands::hide_public_channel_message::HidePublicChannelMessageSubCommand),
     /// Mute a public key
     MutePublicKey(sub_commands::mute_publickey::MutePublickeySubCommand),
+    /// Encode/Decode a nprofile string (bech32 encoded)
+    Nprofile(sub_commands::nprofile::NprofileSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -133,6 +135,9 @@ fn main() -> Result<()> {
         }
         Commands::ConvertKey(sub_command_args) => {
             sub_commands::convert_key::convert_key(sub_command_args)
+        }
+        Commands::Nprofile(sub_command_args) => {
+            sub_commands::nprofile::nprofile(sub_command_args)
         }
         Commands::Vanity(sub_command_args) => {
             sub_commands::vanity::vanity(sub_command_args)
