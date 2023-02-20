@@ -9,6 +9,7 @@
 - Add Dockerfile by [@bijeebuss](https://github.com/bijeebuss).
 - Add .devcontainer by [@bijeebuss](https://github.com/bijeebuss).
 - Add encoding/decoding of nprofile strings
+- Add NIP-14 (subject tags) support to text notes
 
 ### Fixed
 - Update typo in examples in Readme by [@gourcetools](https://github.com/gourcetools).
