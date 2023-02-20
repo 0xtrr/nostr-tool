@@ -29,6 +29,11 @@ cargo install nostr-tool
 cargo build --release
 ```
 
+### Build with Docker
+```shell
+docker build -t nostr-tool .
+```
+
 Run `nostr-tools` command once to get the standard help menu up. Each subcommand also has it's own help menu accessed by appending the --help flag.
 
 ## Examples
@@ -85,4 +90,9 @@ nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} delete-event -e {EVENT_ID} -
 
 ```shell
 nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} react -e {EVENT_ID} -a {EVENT_AUTHOR_PUBKEY} -r "👍"
+```
+
+### Run with docker
+```shell
+docker run nostr-tool nostr-tool -r wss://nostr.oxtr.dev text-note -c "Hello World"
 ```
