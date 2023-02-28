@@ -29,10 +29,8 @@ pub fn mute_publickey(
     let hex_pubkey = parse_key(sub_command_args.public_key.clone())?;
     let pubkey_to_mute = Keys::from_pk_str(hex_pubkey.as_str())?;
 
-    let event_id = client.mute_channel_user(
-        pubkey_to_mute.public_key(),
-        sub_command_args.reason.clone(),
-    )?;
+    let event_id =
+        client.mute_channel_user(pubkey_to_mute.public_key(), sub_command_args.reason.clone())?;
     println!(
         "Public key {} muted in event {}",
         pubkey_to_mute.public_key(),
