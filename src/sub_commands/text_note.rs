@@ -41,7 +41,7 @@ pub fn broadcast_textnote(
 
     // Set up tags
     let mut tags: Vec<Tag> = vec![];
-   
+
     // Subject tag (NIP-14)
     if let Some(subject) = &sub_command_args.subject {
         let subject_tag = Tag::Subject(subject.clone());

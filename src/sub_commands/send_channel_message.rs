@@ -1,6 +1,6 @@
+use crate::utils::{create_client, handle_keys, parse_key};
 use clap::Args;
 use nostr_sdk::prelude::*;
-use crate::utils::{create_client, handle_keys, parse_key};
 
 #[derive(Args)]
 pub struct SendChannelMessageSubCommand {
@@ -28,8 +28,15 @@ pub fn send_channel_message(
     let hex_channel_id: String = parse_key(sub_command_args.channel_id.clone())?;
     let ch_id: ChannelId = ChannelId::from_hex(hex_channel_id)?;
 
-    let event_id = client.send_channel_msg(ch_id, Some(Url::parse(relays[0].as_str())?), sub_command_args.message.clone())?;
-    println!("Public channel message sent with id: {}", event_id.to_bech32()?);
+    let event_id = client.send_channel_msg(
+        ch_id,
+        Some(Url::parse(relays[0].as_str())?),
+        sub_command_args.message.clone(),
+    )?;
+    println!(
+        "Public channel message sent with id: {}",
+        event_id.to_bech32()?
+    );
 
     Ok(())
 }
