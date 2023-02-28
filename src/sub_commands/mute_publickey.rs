@@ -1,6 +1,6 @@
+use crate::utils::{create_client, handle_keys, parse_key};
 use clap::Args;
 use nostr_sdk::prelude::*;
-use crate::utils::{create_client, handle_keys, parse_key};
 
 #[derive(Args)]
 pub struct MutePublickeySubCommand {
@@ -27,10 +27,15 @@ pub fn mute_publickey(
 
     // Set up pubkey to mute
     let hex_pubkey = parse_key(sub_command_args.public_key.clone())?;
-    let pubkey_to_mute = Keys::from_pk_str(hex_pubkey.as_str())?; 
+    let pubkey_to_mute = Keys::from_pk_str(hex_pubkey.as_str())?;
 
-    let event_id = client.mute_channel_user(pubkey_to_mute.public_key().clone(), sub_command_args.reason.clone())?;
-    println!("Public key {} muted in event {}", pubkey_to_mute.public_key().to_string(), event_id);
+    let event_id =
+        client.mute_channel_user(pubkey_to_mute.public_key(), sub_command_args.reason.clone())?;
+    println!(
+        "Public key {} muted in event {}",
+        pubkey_to_mute.public_key(),
+        event_id
+    );
 
     Ok(())
 }
