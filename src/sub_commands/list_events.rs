@@ -31,6 +31,9 @@ pub struct ListEventsSubCommand {
     /// Limit
     #[arg(short, long, action = clap::ArgAction::Append)]
     limit: Option<usize>,
+    /// Output
+    #[arg(short, long)]
+    output: Option<String>,
 }
 
 pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
@@ -82,9 +85,15 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         None,
     )?;
 
-    for (i, event) in events.iter().enumerate() {
-        if let Ok(e) = serde_json::to_string_pretty(event) {
-            println!("{i}: {e:#}")
+    if let Some(output) = &sub_command_args.output {
+        let file = std::fs::File::create(output).unwrap();
+        serde_json::to_writer_pretty(file, &events).unwrap();
+        println!("Wrote {} event(s) to {}", events.len(), output);
+    } else {
+        for (i, event) in events.iter().enumerate() {
+            if let Ok(e) = serde_json::to_string_pretty(event) {
+                println!("{i}: {e:#}")
+            }
         }
     }
 

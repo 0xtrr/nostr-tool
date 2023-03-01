@@ -60,6 +60,8 @@ enum Commands {
     MutePublicKey(sub_commands::mute_publickey::MutePublickeySubCommand),
     /// Encode/Decode a nprofile string (bech32 encoded)
     Nprofile(sub_commands::nprofile::NprofileSubCommand),
+    /// Broadcast events from file
+    BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -181,6 +183,9 @@ fn main() -> Result<()> {
                 args.difficulty_target,
                 sub_command_args
             )
+        }
+        Commands::BroadcastEvents(sub_command_args) => {
+            sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
         }
     }
 }
