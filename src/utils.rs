@@ -64,37 +64,50 @@ mod tests {
 
     #[test]
     fn test_parse_key_hex_input() {
-        let hex_key = String::from("f4deaad98b61fa24d86ef315f1d5d57c1a6a533e1e87e777e5d0b48dcd332cdb");
+        let hex_key =
+            String::from("f4deaad98b61fa24d86ef315f1d5d57c1a6a533e1e87e777e5d0b48dcd332cdb");
         let result = parse_key(hex_key.clone());
-        
+
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), hex_key.clone());
+        assert_eq!(result.unwrap(), hex_key);
     }
 
     #[test]
     fn test_parse_key_bech32_note_input() {
-        let bech32_note_id = String::from("note1h445ule4je70k7kvddate8kpsh2fd6n77esevww5hmgda2qwssjsw957wk");
-        let result = parse_key(bech32_note_id.clone());
-        
+        let bech32_note_id =
+            String::from("note1h445ule4je70k7kvddate8kpsh2fd6n77esevww5hmgda2qwssjsw957wk");
+        let result = parse_key(bech32_note_id);
+
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), String::from("bd6b4e7f35967cfb7acc6b7abc9ec185d496ea7ef6619639d4bed0dea80e8425"));
+        assert_eq!(
+            result.unwrap(),
+            String::from("bd6b4e7f35967cfb7acc6b7abc9ec185d496ea7ef6619639d4bed0dea80e8425")
+        );
     }
 
     #[test]
     fn test_parse_bech32_public_key_input() {
-        let bech32_encoded_key = String::from("npub1ktt8phjnkfmfrsxrgqpztdjuxk3x6psf80xyray0l3c7pyrln49qhkyhz0");
+        let bech32_encoded_key =
+            String::from("npub1ktt8phjnkfmfrsxrgqpztdjuxk3x6psf80xyray0l3c7pyrln49qhkyhz0");
         let result = parse_key(bech32_encoded_key);
 
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), String::from("b2d670de53b27691c0c3400225b65c35a26d06093bcc41f48ffc71e0907f9d4a"));
+        assert_eq!(
+            result.unwrap(),
+            String::from("b2d670de53b27691c0c3400225b65c35a26d06093bcc41f48ffc71e0907f9d4a")
+        );
     }
 
     #[test]
     fn test_parse_bech32_private_key() {
-        let bech32_encoded_key = String::from("nsec1hdeqm0y8vgzuucqv4840h7rlpy4qfu928ulxh3dzj6s2nqupdtzqagtew3");
+        let bech32_encoded_key =
+            String::from("nsec1hdeqm0y8vgzuucqv4840h7rlpy4qfu928ulxh3dzj6s2nqupdtzqagtew3");
         let result = parse_key(bech32_encoded_key);
-        
+
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), String::from("bb720dbc876205ce600ca9eafbf87f092a04f0aa3f3e6bc5a296a0a983816ac4"));
+        assert_eq!(
+            result.unwrap(),
+            String::from("bb720dbc876205ce600ca9eafbf87f092a04f0aa3f3e6bc5a296a0a983816ac4")
+        );
     }
 }

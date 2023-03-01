@@ -29,9 +29,9 @@ pub fn hide_public_channel_message(
     // Set up eventId
     let hex_event_id = parse_key(sub_command_args.event_id.clone())?;
     let event_id_to_hide = EventId::from_hex(hex_event_id)?;
-    
-    client.hide_channel_msg(event_id_to_hide.clone(), sub_command_args.reason.clone())?;
-    println!("Channel message with id {} successfully hidden", event_id_to_hide);
+
+    client.hide_channel_msg(event_id_to_hide, sub_command_args.reason.clone())?;
+    println!("Channel message with id {event_id_to_hide} successfully hidden");
 
     Ok(())
 }
