@@ -1,9 +1,7 @@
 use nostr_sdk::blocking::Client;
 use nostr_sdk::prelude::*;
 
-// Parses a private key string and returns a keypair if valid.
-// If the private_key is None, a new keypair will be generated
-pub fn handle_keys(private_key: Option<String>) -> Result<Keys> {
+pub fn handle_keys(private_key: Option<String>, hex: bool) -> Result<Keys> {
     // Parse and validate private key
     let keys = match private_key {
         Some(pk) => {
@@ -17,8 +15,13 @@ pub fn handle_keys(private_key: Option<String>) -> Result<Keys> {
         }
     };
 
-    println!("Private key: {}", keys.secret_key()?.to_bech32()?);
-    println!("Public key: {}", keys.public_key().to_bech32()?);
+    if !hex {
+        println!("Private key: {}", keys.secret_key()?.to_bech32()?);
+        println!("Public key: {}", keys.public_key().to_bech32()?);
+    } else {
+        println!("Private key: {}", keys.secret_key()?.display_secret());
+        println!("Public key: {}", keys.public_key());
+    }
     Ok(keys)
 }
 

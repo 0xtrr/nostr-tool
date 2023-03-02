@@ -19,6 +19,9 @@ pub struct UpdateMetadataSubCommand {
     nip05: Option<String>,
     #[arg(long)]
     lud06: Option<String>,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn update_metadata(
@@ -31,7 +34,7 @@ pub fn update_metadata(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     let mut metadata = Metadata::new();

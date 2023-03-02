@@ -8,6 +8,9 @@ pub struct BroadcastEventsSubCommand {
     /// Text note content
     #[arg(short, long)]
     input: String,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn broadcast_events(
@@ -18,7 +21,7 @@ pub fn broadcast_events(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(None)?;
+    let keys = handle_keys(None, sub_command_args.hex)?;
     let client = create_client(&keys, relays.clone(), 0)?;
 
     let file = std::fs::File::open(&sub_command_args.input)?;

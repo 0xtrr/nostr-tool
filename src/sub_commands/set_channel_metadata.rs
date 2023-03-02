@@ -21,6 +21,9 @@ pub struct SetChannelMetadataSubCommand {
     /// Channel picture
     #[arg(short, long)]
     picture: Option<String>,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn set_channel_metadata(
@@ -34,7 +37,7 @@ pub fn set_channel_metadata(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays.clone(), difficulty_target)?;
 
     // Parse the channel id which can both be hex or bech32 encoded
