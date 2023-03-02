@@ -24,6 +24,9 @@ pub struct TextNoteSubCommand {
     /// Seconds till expiration (NIP-40)
     #[arg(long)]
     expiration: Option<u64>,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn broadcast_textnote(
@@ -36,7 +39,7 @@ pub fn broadcast_textnote(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     // Set up tags
@@ -68,7 +71,11 @@ pub fn broadcast_textnote(
 
     // Publish event
     let event_id = client.publish_text_note(sub_command_args.content.clone(), &tags)?;
-    println!("Published text note with id: {}", event_id.to_bech32()?);
+    if !sub_command_args.hex {
+        println!("Published text note with id: {}", event_id.to_bech32()?);
+    } else {
+        println!("Published text note with id: {}", event_id.to_hex());
+    }
 
     Ok(())
 }

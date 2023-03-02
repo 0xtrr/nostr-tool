@@ -12,6 +12,9 @@ pub struct PublishContactListCsvSubCommand {
     /// pubkey,relay_url,petname. See example in resources/contact_list.csv
     #[arg(short, long)]
     filepath: String,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 // nostr_rust ContactListTag struct does not derive "Deserialize", therefore we need this custom implementation
@@ -35,7 +38,7 @@ pub fn publish_contact_list_from_csv_file(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     let mut rdr = csv::Reader::from_path(&sub_command_args.filepath)?;

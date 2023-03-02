@@ -11,6 +11,9 @@ pub struct DeleteEventSubCommand {
     /// Reason for deleting the events
     #[arg(short, long)]
     reason: Option<String>,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn delete(
@@ -23,13 +26,17 @@ pub fn delete(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     let event_id_to_delete_hex = parse_key(sub_command_args.event_id.clone())?;
     let event_id = EventId::from_hex(event_id_to_delete_hex)?;
 
     let event_id = client.delete_event(event_id, sub_command_args.reason.clone())?;
-    println!("Deleted event with id: {}", event_id.to_bech32()?);
+    if !sub_command_args.hex {
+        println!("Deleted event with id: {}", event_id.to_bech32()?);
+    } else {
+        println!("Deleted event with id: {}", event_id.to_hex());
+    }
     Ok(())
 }

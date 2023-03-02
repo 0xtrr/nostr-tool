@@ -13,6 +13,9 @@ pub struct CreatePublicChannelSubCommand {
     /// Channel picture
     #[arg(short, long)]
     picture: Option<String>,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn create_public_channel(
@@ -26,7 +29,7 @@ pub fn create_public_channel(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     // Create metadata

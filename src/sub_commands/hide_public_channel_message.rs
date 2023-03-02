@@ -11,6 +11,9 @@ pub struct HidePublicChannelMessageSubCommand {
     /// Event to hide
     #[arg(short, long)]
     event_id: String,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn hide_public_channel_message(
@@ -23,7 +26,7 @@ pub fn hide_public_channel_message(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     // Set up eventId

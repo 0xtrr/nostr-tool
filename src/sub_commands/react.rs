@@ -16,6 +16,9 @@ pub struct ReactionSubCommand {
     /// Reaction content. Set to '+' for like or '-' for dislike. Single emojis are also often used for reactions, such as in Damus Web.
     #[arg(short, long)]
     reaction: String,
+    // Print keys as hex
+    #[arg(long, default_value = "false")]
+    hex: bool,
 }
 
 pub fn react_to_event(
@@ -28,7 +31,7 @@ pub fn react_to_event(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key)?;
+    let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     if sub_command_args.reaction.trim().is_empty() {
