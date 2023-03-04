@@ -11,6 +11,7 @@ pub mod nprofile;
 pub mod publish_contactlist_csv;
 pub mod react;
 pub mod recommend_relay;
+pub mod resource;
 pub mod send_channel_message;
 pub mod set_channel_metadata;
 pub mod text_note;

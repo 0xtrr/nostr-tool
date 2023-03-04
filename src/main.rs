@@ -64,6 +64,8 @@ enum Commands {
     Nprofile(sub_commands::nprofile::NprofileSubCommand),
     /// Broadcast events from file
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
+    /// Create a resource (kind 9 note). Experimental.
+    CreateResource(sub_commands::resource::ResourceSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -172,5 +174,11 @@ fn main() -> Result<()> {
         Commands::BroadcastEvents(sub_command_args) => {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
         }
+        Commands::CreateResource(sub_command_args) => sub_commands::resource::create_resource(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
     }
 }
