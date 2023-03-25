@@ -1,4 +1,5 @@
-use bitcoin::hashes::hex::FromHex;
+use std::str::FromStr;
+
 use clap::Args;
 use nostr_sdk::prelude::*;
 
@@ -44,7 +45,7 @@ pub fn set_channel_metadata(
     let hex_channel_id: String = parse_key(sub_command_args.channel_id.clone())?;
 
     // Build ChannelId object which is required in set_channel_metadata function
-    let sha256 = bitcoin::hashes::sha256::Hash::from_hex(hex_channel_id.as_str())?;
+    let sha256 = bitcoin::hashes::sha256::Hash::from_str(hex_channel_id.as_str())?;
     let channel_id = ChannelId::new(sha256, relays);
     // Build relay URL
     let relay_url: Option<Url> = match &sub_command_args.recommended_relay {
