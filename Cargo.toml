@@ -14,6 +14,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 clap = { version = "4.1.6", features = ["derive"] }
 csv = "1.1.6"
+futures = "0.3.27"
 nostr-sdk = { version = "0.20", features = ["blocking", "vanity"] }
 num_cpus = "1.15.0"
 serde = { version = "1.0.147", features = ["derive"] }
