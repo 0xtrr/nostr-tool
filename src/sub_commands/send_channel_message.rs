@@ -33,7 +33,7 @@ pub fn send_channel_message(
 
     let event_id = client.send_channel_msg(
         ch_id,
-        Some(Url::parse(relays[0].as_str())?),
+        Url::parse(relays[0].as_str())?,
         sub_command_args.message.clone(),
     )?;
     println!(

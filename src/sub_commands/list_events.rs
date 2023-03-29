@@ -69,7 +69,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     });
 
     let events: Vec<Event> = client.get_events_of(
-        vec![SubscriptionFilter {
+        vec![Filter {
             ids: sub_command_args.ids.clone(),
             authors,
             kinds,
@@ -81,6 +81,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             since: sub_command_args.since.map(Timestamp::from),
             until: sub_command_args.until.map(Timestamp::from),
             limit: sub_command_args.limit,
+            custom: Map::new(),
         }],
         None,
     )?;
