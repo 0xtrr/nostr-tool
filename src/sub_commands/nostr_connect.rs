@@ -7,10 +7,8 @@ use clap::Args;
 use futures::executor::block_on;
 
 use nostr_sdk::blocking::Client;
-use nostr_sdk::nips::nip46::NostrConnectMetadata;
-use nostr_sdk::nips::nip46::{Message, Request};
+use nostr_sdk::nips::nip46::{Message, NostrConnectMetadata, Request};
 use nostr_sdk::prelude::*;
-use nostr_sdk::secp256k1::schnorr::Signature;
 
 use crate::utils::{create_client, handle_keys};
 
@@ -39,7 +37,6 @@ pub fn app(
     sub_command_args: &ConnectAppSubCommand,
 ) -> Result<()> {
     let keys = handle_keys(private_key, sub_command_args.hex)?;
-    println!(":{}:", relays[0]);
 
     let mut nostr_connect_uri: NostrConnectURI =
         NostrConnectURI::new(keys.public_key(), Url::parse(&relays[0])?, "Nostr Tool");
@@ -50,9 +47,10 @@ pub fn app(
     }
 
     let relay_url = Url::from_str(&relays[0])?;
-    println!("{relay_url}");
 
-    let client = Client::with_remote_signer(&keys, relay_url, None);
+    let signer = RemoteSigner::new(relay_url, None);
+
+    let client = Client::with_remote_signer(&keys, signer);
 
     println!("\n###############################################\n");
     println!("Nostr Connect URI: {nostr_connect_uri}");
@@ -61,15 +59,24 @@ pub fn app(
     client.add_relay(relays[0].clone(), None)?;
     client.connect();
 
+    println!("Requesting pub key");
+
     // Get Signer Pubkey
     client.req_signer_public_key(Some(Duration::from_secs(180)))?;
 
-    let id = client.publish_text_note("Hello world", &[])?;
+    loop {
+        print!("Content: ");
+        let mut content = String::new();
+        // io::stdin()
+        //    .read_line(&mut content)
+        //     .expect("Failed to read line");
 
-    println!("Broadcasted Event: {}", id.to_hex());
-    println!("\n###############################################\n");
+        content = "hello world".to_string();
+        let id = client.publish_text_note(content, &[])?;
 
-    Ok(())
+        println!("Broadcasted Event: {}", id.to_hex());
+        println!("\n###############################################\n");
+    }
 }
 
 pub fn signer(
