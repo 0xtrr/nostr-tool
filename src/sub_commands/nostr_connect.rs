@@ -59,21 +59,23 @@ pub fn app(
     client.add_relay(relays[0].clone(), None)?;
     client.connect();
 
-    println!("Requesting pub key");
-
     // Get Signer Pubkey
     client.req_signer_public_key(Some(Duration::from_secs(180)))?;
 
     loop {
         print!("Content: ");
         let mut content = String::new();
-        // io::stdin()
-        //    .read_line(&mut content)
-        //     .expect("Failed to read line");
+        io::stdout().flush().expect("Failed to flush stdout");
+        io::stdin()
+            .read_line(&mut content)
+            .expect("Failed to read line");
+        println!("###############################################");
 
-        content = "hello world".to_string();
+        println!("Getting signature ...");
+
         let id = client.publish_text_note(content, &[])?;
 
+        println!("###############################################");
         println!("Broadcasted Event: {}", id.to_hex());
         println!("\n###############################################\n");
     }
