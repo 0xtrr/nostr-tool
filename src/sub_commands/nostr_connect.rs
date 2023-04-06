@@ -1,15 +1,16 @@
+use std::io;
+use std::io::Write;
 use std::str::FromStr;
-
-use futures::executor::block_on;
+use std::time::Duration;
 
 use clap::Args;
+use futures::executor::block_on;
+
+use nostr_sdk::blocking::Client;
 use nostr_sdk::nips::nip46::NostrConnectMetadata;
 use nostr_sdk::nips::nip46::{Message, Request};
 use nostr_sdk::prelude::*;
 use nostr_sdk::secp256k1::schnorr::Signature;
-
-use std::io;
-use std::io::Write;
 
 use crate::utils::{create_client, handle_keys};
 
@@ -48,41 +49,25 @@ pub fn app(
         nostr_connect_uri = nostr_connect_uri.url(Url::parse(url)?);
     }
 
-    let client = create_client(&keys, relays, 0)?;
+    let relay_url = Url::from_str(&relays[0])?;
+    println!("{relay_url}");
+
+    let client = Client::with_remote_signer(&keys, relay_url, None);
 
     println!("\n###############################################\n");
     println!("Nostr Connect URI: {nostr_connect_uri}");
     println!("\n###############################################\n");
 
+    client.add_relay(relays[0].clone(), None)?;
     client.connect();
 
-    // Listen for connect ACK
-    let signer_pubkey = block_on(get_signer_pubkey(&client));
-    println!("Received signer pubkey: {signer_pubkey}");
+    // Get Signer Pubkey
+    client.req_signer_public_key(Some(Duration::from_secs(180)))?;
 
+    let id = client.publish_text_note("Hello world", &[])?;
+
+    println!("Broadcasted Event: {}", id.to_hex());
     println!("\n###############################################\n");
-
-    /*
-    let msg = Message::request(Request::GetPublicKey);
-    let res = block_on(get_response(&client, signer_pubkey, msg))?;
-    if let Response::GetPublicKey(pubkey) = res {
-        println!("Received pubeky {pubkey}");
-        println!("\n###############################################\n");
-    }
-    */
-
-    // compose unsigned event
-    let unsigned_event = EventBuilder::new_text_note("Hello world from Nostr Tool", &[])
-        .to_unsigned_event(signer_pubkey);
-    let msg = Message::request(Request::SignEvent(unsigned_event.clone()));
-    println!("Sending Sign: {:?}", msg);
-    let res = block_on(get_response(&client, signer_pubkey, msg))?;
-    if let Response::SignEvent(sig) = res {
-        let event = unsigned_event.add_signature(sig)?;
-        let id = client.send_event(event)?;
-        println!("Published event {id}");
-        println!("\n###############################################\n");
-    }
 
     Ok(())
 }
@@ -93,8 +78,7 @@ pub fn signer(
 ) -> Result<()> {
     println!("Running Nostr Connect Signer");
     println!("\n###############################################\n");
-    let parsed_url = Url::parse(&sub_command_args.connect_url).unwrap();
-
+    let parsed_url = Url::parse(&sub_command_args.connect_url)?;
     let app_pubkey = parsed_url.domain().unwrap();
     let relay = parsed_url
         .query_pairs()
@@ -135,13 +119,6 @@ pub fn signer(
         .to_event(&keys)?;
     client.send_event(event)?;
 
-    // Request::Connect(XOnlyPublicKey::from_str(hash)?);
-    // let res = block_on(get_response(
-    //     &client,
-    //    XOnlyPublicKey::from_str(hash)?,
-    //    msg.clone(),
-    // ))?;
-    // println!("res: {res:?}");
     block_on(get_request(&client, XOnlyPublicKey::from_str(app_pubkey)?))?;
 
     Ok(())
@@ -178,12 +155,13 @@ async fn get_request(
                                         Ok(true) => {
                                             let signed_event = event.sign(&keys)?;
 
+                                            // let result =
+
                                             Message::Response {
                                                 id: id.to_string(),
-                                                result: Some(
-                                                    serde_json::from_str(&signed_event.as_json())
-                                                        .unwrap(),
-                                                ),
+                                                result: Some(Value::String(
+                                                    signed_event.sig.to_string(),
+                                                )),
                                                 error: None,
                                             }
                                         }
@@ -219,109 +197,6 @@ async fn get_request(
     client.unsubscribe();
 
     panic!("");
-}
-
-async fn get_response(
-    client: &nostr_sdk::blocking::Client,
-    signer_pubkey: XOnlyPublicKey,
-    msg: Message,
-) -> Result<Response> {
-    let keys = client.keys();
-    let req_id = msg.id();
-    let req = msg.to_request()?;
-
-    let event = EventBuilder::nostr_connect(&keys, signer_pubkey, msg)?.to_event(&keys)?;
-    client.send_event(event)?;
-
-    client.subscribe(vec![Filter::new()
-        .pubkey(keys.public_key())
-        .kind(Kind::NostrConnect)]);
-
-    println!("Waiting for response to request: {}", req_id);
-    println!("\n###############################################\n");
-
-    let mut notifications = client.notifications();
-    while let Ok(notification) = notifications.recv().await {
-        if let RelayPoolNotification::Event(_url, event) = notification {
-            if event.kind == Kind::NostrConnect {
-                match decrypt(&keys.secret_key()?, &event.pubkey, &event.content) {
-                    Ok(msg) => {
-                        let msg = Message::from_json(msg)?;
-
-                        println!("New message received: {msg:#?}");
-                        println!("\n###############################################\n");
-
-                        if let Message::Response { id, result, error } = &msg {
-                            if &req_id == id {
-                                if let Some(result) = result {
-                                    let res = match req {
-                                        Request::SignEvent(_) => {
-                                            let sig: Value =
-                                                serde_json::from_value(result.to_owned())?;
-                                            let sig = sig.get("sig").unwrap().as_str().unwrap();
-                                            Response::SignEvent(Signature::from_str(sig).unwrap())
-                                        }
-                                        Request::GetPublicKey => {
-                                            let pubkey = serde_json::from_value(result.to_owned())?;
-                                            Response::GetPublicKey(pubkey)
-                                        }
-                                        _ => todo!(),
-                                    };
-                                    client.unsubscribe();
-                                    return Ok(res);
-                                }
-
-                                if let Some(error) = error {
-                                    client.unsubscribe();
-                                    panic!("Error response {error}");
-                                }
-
-                                break;
-                            }
-                        } else {
-                            println!("Makes no sense");
-                        }
-                    }
-                    Err(e) => eprintln!("Impossible to decrypt NIP46 message: {e}"),
-                }
-            }
-        }
-    }
-
-    client.unsubscribe();
-
-    panic!("");
-}
-
-async fn get_signer_pubkey(client: &blocking::Client) -> XOnlyPublicKey {
-    client.subscribe(vec![Filter::new()
-        .pubkey(client.keys().public_key())
-        .kind(Kind::NostrConnect)
-        .since(Timestamp::now())]);
-
-    loop {
-        let mut notifications = client.notifications();
-        while let Ok(notification) = notifications.recv().await {
-            if let RelayPoolNotification::Event(_url, event) = notification {
-                if event.kind == Kind::NostrConnect {
-                    match decrypt(
-                        &client.keys().secret_key().unwrap(),
-                        &event.pubkey,
-                        &event.content,
-                    ) {
-                        Ok(msg) => {
-                            let msg = Message::from_json(msg).unwrap();
-                            if let Ok(Request::Connect(pubkey)) = msg.to_request() {
-                                client.unsubscribe();
-                                return pubkey;
-                            }
-                        }
-                        Err(e) => eprintln!("Impossible to decrypt NIP46 message: {e}"),
-                    }
-                }
-            }
-        }
-    }
 }
 
 fn get_user_confirmation(prompt: &str) -> Result<bool> {

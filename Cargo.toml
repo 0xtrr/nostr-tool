@@ -15,7 +15,7 @@ categories = ["command-line-utilities"]
 clap = { version = "4.1.6", features = ["derive"] }
 csv = "1.1.6"
 futures = "0.3.27"
-nostr-sdk = { version = "0.20", features = ["blocking", "vanity"] }
+nostr-sdk = { git = "https://github.com/thesimplekid/nostr", rev="210a3ede8a5812c6ca447d4483cc9b0482de2aec", features = ["blocking", "vanity", "nip46"] }
 num_cpus = "1.15.0"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.91"
