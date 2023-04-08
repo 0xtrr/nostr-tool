@@ -186,6 +186,59 @@ async fn get_request(
                                         },
                                     }
                                 }
+                                "delegate" => {
+                                    let req = msg.to_request().unwrap();
+
+                                    if let Ok(Request::Delegate {
+                                        public_key,
+                                        conditions,
+                                    }) = msg.to_request()
+                                    {
+                                        println!("Delegation Request from: {:?}", public_key);
+                                        println!("Conditions: {}", conditions);
+                                        println!(
+                                            "\n###############################################\n"
+                                        );
+
+                                        match get_user_confirmation("Would you like to sign?") {
+                                            Ok(true) => {
+                                                if let Ok(Some(response)) =
+                                                    req.generate_response(&keys)
+                                                {
+                                                    let res =
+                                                        Message::response(id.clone(), response);
+                                                    println!("{:?}", res);
+                                                    res
+                                                } else {
+                                                    Message::Response {
+                                                        id: id.to_string(),
+                                                        result: None,
+                                                        error: Some(
+                                                            "Failed to generate delegation"
+                                                                .to_string(),
+                                                        ),
+                                                    }
+                                                }
+                                            }
+                                            Ok(false) => Message::Response {
+                                                id: id.to_string(),
+                                                result: None,
+                                                error: Some("Declined to sign".to_string()),
+                                            },
+                                            Err(err) => Message::Response {
+                                                id: id.to_string(),
+                                                result: None,
+                                                error: Some(format!("{}", err)),
+                                            },
+                                        }
+                                    } else {
+                                        Message::Response {
+                                            id: id.to_string(),
+                                            result: None,
+                                            error: Some(format!("")),
+                                        }
+                                    }
+                                }
                                 _ => todo!(),
                             };
 
