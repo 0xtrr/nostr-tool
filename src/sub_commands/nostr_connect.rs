@@ -147,9 +147,6 @@ async fn get_request(
                     Ok(msg) => {
                         let msg = Message::from_json(msg)?;
 
-                        //println!("New message received: {msg:#?}");
-                        //println!("\n###############################################\n");
-
                         if let Message::Request { id, method, params } = &msg {
                             let msg = match method.as_str() {
                                 "sign_event" => {
@@ -163,8 +160,6 @@ async fn get_request(
                                     match get_user_confirmation("Would you like to sign?") {
                                         Ok(true) => {
                                             let signed_event = event.sign(&keys)?;
-
-                                            // let result =
 
                                             Message::Response {
                                                 id: id.to_string(),
@@ -194,7 +189,11 @@ async fn get_request(
                                         conditions,
                                     }) = msg.to_request()
                                     {
-                                        println!("Delegation Request from: {:?}", public_key);
+                                        println!(
+                                            "Delegation Request from: {}({})",
+                                            public_key.to_bech32().unwrap_or("".to_string()),
+                                            public_key
+                                        );
                                         println!("Conditions: {}", conditions);
                                         println!(
                                             "\n###############################################\n"
@@ -205,10 +204,7 @@ async fn get_request(
                                                 if let Ok(Some(response)) =
                                                     req.generate_response(&keys)
                                                 {
-                                                    let res =
-                                                        Message::response(id.clone(), response);
-                                                    println!("{:?}", res);
-                                                    res
+                                                    Message::response(id.clone(), response)
                                                 } else {
                                                     Message::Response {
                                                         id: id.to_string(),
@@ -235,7 +231,7 @@ async fn get_request(
                                         Message::Response {
                                             id: id.to_string(),
                                             result: None,
-                                            error: Some(format!("")),
+                                            error: Some("".to_string()),
                                         }
                                     }
                                 }
@@ -270,21 +266,26 @@ fn get_user_confirmation(prompt: &str) -> Result<bool> {
         .read_line(&mut input)
         .expect("Failed to read user input");
 
-    match input.trim().to_lowercase().as_str() {
+    let result = match input.trim().to_lowercase().as_str() {
         "y" | "yes" => {
             // Action to be taken if user confirms (e.g. "yes" input)
             println!("Action confirmed!");
-            return Ok(true);
+            true
         }
         "n" | "no" => {
             // Action to be taken if user declines (e.g. "no" input)
             println!("Action declined.");
-            return Ok(false);
+            false
         }
         _ => {
             // Action to be taken if user enters an invalid input
             println!("Invalid input.");
+            false
         }
-    }
-    Ok(false)
+    };
+
+    println!("\n###############################################\n");
+    println!("Waiting for next event...\n");
+
+    Ok(result)
 }
