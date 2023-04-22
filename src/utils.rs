@@ -28,7 +28,7 @@ pub fn handle_keys(private_key: Option<String>, hex: bool) -> Result<Keys> {
 // Creates the websocket client that is used for communicating with relays
 pub fn create_client(keys: &Keys, relays: Vec<String>, difficulty: u8) -> Result<Client> {
     let opts = Options::new().wait_for_send(true).difficulty(difficulty);
-    let client = Client::new_with_opts(keys, opts);
+    let client = Client::with_opts(keys, opts);
     let relays = relays.iter().map(|url| (url, None)).collect();
     client.add_relays(relays)?;
     client.connect();

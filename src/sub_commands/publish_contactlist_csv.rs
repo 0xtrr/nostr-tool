@@ -45,9 +45,13 @@ pub fn publish_contact_list_from_csv_file(
     let mut contacts: Vec<Contact> = vec![];
     for result in rdr.deserialize() {
         let tag: ContactListTag = result?;
+        let relay_url = match tag.relay {
+            Some(relay) => Some(UncheckedUrl::from_str(&relay)?),
+            None => None
+        };
         let clt = Contact {
             pk: XOnlyPublicKey::from_str(&tag.pubkey)?,
-            relay_url: tag.relay,
+            relay_url,
             alias: tag.petname,
         };
         contacts.push(clt);

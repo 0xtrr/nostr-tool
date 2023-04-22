@@ -43,13 +43,6 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     let client = create_client(&Keys::generate(), relays, 0)?;
 
-    let authors: Option<Vec<XOnlyPublicKey>> = sub_command_args.authors.as_ref().map(|auths| {
-        auths
-            .iter()
-            .map(|a| XOnlyPublicKey::from_str(a.as_str()).expect("Invalid public key"))
-            .collect()
-    });
-
     let kinds: Option<Vec<Kind>> = sub_command_args
         .kinds
         .as_ref()
@@ -71,7 +64,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
             ids: sub_command_args.ids.clone(),
-            authors,
+            authors: sub_command_args.authors.clone(),
             kinds,
             events,
             pubkeys,
