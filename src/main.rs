@@ -66,6 +66,10 @@ enum Commands {
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
     /// Create a resource (kind 9 note). Experimental.
     CreateResource(sub_commands::resource::ResourceSubCommand),
+    /// Nostr Connect Signer
+    ConnectSigner(sub_commands::nostr_connect::ConnectSignerSubCommand),
+    // Nostr Connect App
+    ConnectApp(sub_commands::nostr_connect::ConnectAppSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -180,5 +184,11 @@ fn main() -> Result<()> {
             args.difficulty_target,
             sub_command_args,
         ),
+        Commands::ConnectSigner(sub_command_args) => {
+            sub_commands::nostr_connect::signer(args.private_key, sub_command_args)
+        }
+        Commands::ConnectApp(sub_command_args) => {
+            sub_commands::nostr_connect::app(args.private_key, args.relays, sub_command_args)
+        }
     }
 }
