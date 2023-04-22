@@ -66,6 +66,10 @@ enum Commands {
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
     /// Create a resource (kind 9 note). Experimental.
     CreateResource(sub_commands::resource::ResourceSubCommand),
+    /// Create a zap request. Currently just prints the json to console, you need to send the HTTP request yourself.
+    CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
+    /// Send a zap receipt note.
+    ZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -175,6 +179,19 @@ fn main() -> Result<()> {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
         }
         Commands::CreateResource(sub_command_args) => sub_commands::resource::create_resource(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
+        Commands::CreateZapRequest(sub_command_args) => {
+            sub_commands::zap_request::create_zap_request(
+                args.private_key,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::ZapReceipt(sub_command_args) => sub_commands::zap_reciept::send_zap_receipt(
             args.private_key,
             args.relays,
             args.difficulty_target,
