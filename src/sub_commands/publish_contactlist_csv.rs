@@ -47,7 +47,7 @@ pub fn publish_contact_list_from_csv_file(
         let tag: ContactListTag = result?;
         let relay_url = match tag.relay {
             Some(relay) => Some(UncheckedUrl::from_str(&relay)?),
-            None => None
+            None => None,
         };
         let clt = Contact {
             pk: XOnlyPublicKey::from_str(&tag.pubkey)?,
