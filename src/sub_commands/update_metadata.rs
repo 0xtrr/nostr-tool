@@ -19,6 +19,8 @@ pub struct UpdateMetadataSubCommand {
     nip05: Option<String>,
     #[arg(long)]
     lud06: Option<String>,
+    #[arg(long)]
+    lud16: Option<String>,
     // Print keys as hex
     #[arg(long, default_value = "false")]
     hex: bool,
@@ -65,6 +67,11 @@ pub fn update_metadata(
     // LUD-06 string
     if let Some(lud06) = &sub_command_args.lud06 {
         metadata = metadata.lud06(lud06);
+    }
+
+    // LUD-16 string
+    if let Some(lud16) = &sub_command_args.lud16 {
+        metadata = metadata.lud16(lud16);
     }
 
     let event_id = client.set_metadata(metadata)?;
