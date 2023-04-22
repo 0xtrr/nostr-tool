@@ -66,6 +66,8 @@ enum Commands {
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
     /// Create a resource (kind 9 note). Experimental.
     CreateResource(sub_commands::resource::ResourceSubCommand),
+    /// Create a new badge
+    CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -175,6 +177,12 @@ fn main() -> Result<()> {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
         }
         Commands::CreateResource(sub_command_args) => sub_commands::resource::create_resource(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
+        Commands::CreateBadge(sub_command_args) => sub_commands::create_badge::create_badge(
             args.private_key,
             args.relays,
             args.difficulty_target,
