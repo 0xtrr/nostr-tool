@@ -6,7 +6,12 @@ on:
       - main
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+    name: Lint
+
   build_and_push:
+    needs: [lint]
     name: Build and Push
     runs-on: ubuntu-latest
     steps:
