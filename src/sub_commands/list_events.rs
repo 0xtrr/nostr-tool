@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use clap::Args;
-use nostr_sdk::prelude::{hash_types::XpubIdentifier, *};
+use nostr_sdk::prelude::*;
 
 use crate::utils::create_client;
 
