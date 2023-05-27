@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use clap::Args;
-use nostr_sdk::prelude::*;
+use nostr_sdk::prelude::{hash_types::XpubIdentifier, *};
 
 use crate::utils::create_client;
 
@@ -16,12 +16,15 @@ pub struct ListEventsSubCommand {
     /// Kinds
     #[arg(short, long, action = clap::ArgAction::Append)]
     kinds: Option<Vec<u64>>,
-    /// p tag
+    /// e tag
     #[arg(short, long, action = clap::ArgAction::Append)]
     e: Option<Vec<String>>,
     /// p tag
     #[arg(short, long, action = clap::ArgAction::Append)]
     p: Option<Vec<String>>,
+    /// d tag
+    #[arg(short, long, action = clap::ArgAction::Append)]
+    d: Option<Vec<String>>,
     /// Since
     #[arg(short, long, action = clap::ArgAction::Append)]
     since: Option<u64>,
@@ -75,6 +78,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             until: sub_command_args.until.map(Timestamp::from),
             limit: sub_command_args.limit,
             custom: Map::new(),
+            identifiers: sub_command_args.d.clone(),
         }],
         None,
     )?;
