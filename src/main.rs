@@ -67,7 +67,7 @@ enum Commands {
     /// Create a zap request. Currently just prints the json to console, you need to send the HTTP request yourself.
     CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
     /// Send a zap receipt note.
-    ZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
+    CreateZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -183,7 +183,7 @@ fn main() -> Result<()> {
                 sub_command_args,
             )
         }
-        Commands::ZapReceipt(sub_command_args) => sub_commands::zap_reciept::send_zap_receipt(
+        Commands::CreateZapReceipt(sub_command_args) => sub_commands::zap_reciept::send_zap_receipt(
             args.private_key,
             args.relays,
             args.difficulty_target,
