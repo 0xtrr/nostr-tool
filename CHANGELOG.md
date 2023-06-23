@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0 - TBD
+
+### Added
+- Save output from list-events to file by [@thesimplekid](https://github.com/thesimplekid)
+- Broadcast events from json file by [@thesimplekid](https://github.com/thesimplekid)
+- Add option to print keys as hex instead of bech32 by [@thesimplekid](https://github.com/thesimplekid)
+- Add LUD-16 to update metadata command by [@w3irdrobot](https://github.com/w3irdrobot)
+
+### Changed
+- Upgrade nostr-sdk from 0.18 to 0.20 by [@thesimplekid](https://github.com/thesimplekid)
+- Upgrade nostr-sdk from 0.20 to 0.21 by [@0xtrr](https://github.com/0xtrr)
+- Upgrade nostr-sdk from 0.21 to 0.22 by [@0xtrr](https://github.com/0xtrr)
+- Remove bitcoin dependency by [@thesimplekid](https://github.com/thesimplekid)
+
+
 ## 0.3.0 - 2023-02-20
 
 ### Added
