@@ -40,25 +40,24 @@ pub fn send_zap_receipt(
     let keys = handle_keys(private_key, sub_command_args.hex)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
-    let pre_image = match sub_command_args.preimage.clone() {
-        Some(pre_image) => pre_image,
-        None => String::from(""),
-    };
-
     // Read in json from specified file
     let event_json: String = fs::read_to_string(sub_command_args.zap_request_json_path.clone())?;
     // Create Event from json
     let event = Event::from_json(event_json)?;
 
-    let event: Event = EventBuilder::new_zap(sub_command_args.bolt11.clone(), 0, pre_image, event)
-        .to_pow_event(&keys, difficulty_target)?;
+    let event: Event = EventBuilder::new_zap(
+        sub_command_args.bolt11.clone(),
+        sub_command_args.preimage.clone(),
+        event,
+    )
+    .to_pow_event(&keys, difficulty_target)?;
 
     // Publish event
     let event_id = client.send_event(event)?;
     if !sub_command_args.hex {
-        println!("Published zap note with id: {}", event_id.to_bech32()?);
+        println!("Published zap receipt with id: {}", event_id.to_bech32()?);
     } else {
-        println!("Published zap note with id: {}", event_id.to_hex());
+        println!("Published zap receipt with id: {}", event_id.to_hex());
     }
 
     Ok(())

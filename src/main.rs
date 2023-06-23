@@ -188,6 +188,6 @@ fn main() -> Result<()> {
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        )
+        ),
     }
 }

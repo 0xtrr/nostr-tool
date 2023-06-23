@@ -1,4 +1,4 @@
-use std::{str::FromStr, fs};
+use std::{fs, str::FromStr};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
@@ -25,12 +25,12 @@ pub struct CreateZapRequestCommand {
     /// Event references. Clients MUST include this if zapping an event rather than a person.
     #[arg(long, action = clap::ArgAction::Append)]
     etag: Vec<String>,
-    // Print keys as hex
+    // Print keys as hex. Defaults to false.
     #[arg(long, default_value = "false")]
     hex: bool,
-    // Write event to a json file
+    // Write event to a json file. Defaults to true.
     #[arg(short, long, default_value = "true")]
-    output_to_file: bool
+    output_to_file: bool,
 }
 
 pub fn create_zap_request(
