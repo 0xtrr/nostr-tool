@@ -183,11 +183,13 @@ fn main() -> Result<()> {
                 sub_command_args,
             )
         }
-        Commands::CreateZapReceipt(sub_command_args) => sub_commands::zap_reciept::send_zap_receipt(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
+        Commands::CreateZapReceipt(sub_command_args) => {
+            sub_commands::zap_reciept::send_zap_receipt(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
     }
 }
