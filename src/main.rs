@@ -64,6 +64,10 @@ enum Commands {
     Nprofile(sub_commands::nprofile::NprofileSubCommand),
     /// Broadcast events from file
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
+    /// Create a zap request. Currently just prints the json to console, you need to send the HTTP request yourself.
+    CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
+    /// Send a zap receipt note.
+    CreateZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -171,6 +175,21 @@ fn main() -> Result<()> {
         ),
         Commands::BroadcastEvents(sub_command_args) => {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
+        }
+        Commands::CreateZapRequest(sub_command_args) => {
+            sub_commands::zap_request::create_zap_request(
+                args.private_key,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::CreateZapReceipt(sub_command_args) => {
+            sub_commands::zap_reciept::send_zap_receipt(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
         }
     }
 }

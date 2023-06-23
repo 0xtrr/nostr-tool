@@ -7,6 +7,7 @@
 - Broadcast events from json file by [@thesimplekid](https://github.com/thesimplekid)
 - Add option to print keys as hex instead of bech32 by [@thesimplekid](https://github.com/thesimplekid)
 - Add LUD-16 to update metadata command by [@w3irdrobot](https://github.com/w3irdrobot)
+- Add support for creating NIP-57 events (Zaps) by [@0xtrr](https://github.com/0xtrr)
 
 ### Changed
 - Upgrade nostr-sdk from 0.18 to 0.20 by [@thesimplekid](https://github.com/thesimplekid)

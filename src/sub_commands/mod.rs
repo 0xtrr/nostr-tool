@@ -16,3 +16,5 @@ pub mod set_channel_metadata;
 pub mod text_note;
 pub mod update_metadata;
 pub mod vanity;
+pub mod zap_reciept;
+pub mod zap_request;
