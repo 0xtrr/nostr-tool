@@ -7,7 +7,7 @@ pub struct VanitySubCommand {
     #[arg(short, long, required = true, action = clap::ArgAction::Append)]
     prefixes: Vec<String>,
     /// Vanity pubkey in hex format
-    #[arg(short, long, default_value_t = false)]
+    #[arg(long, default_value_t = false)]
     hex: bool,
 }
 
