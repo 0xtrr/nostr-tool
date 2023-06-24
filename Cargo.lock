@@ -746,8 +746,7 @@ dependencies = [
 [[package]]
 name = "nostr"
 version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a38ff6fec17be97b6ea1e30a4913618c8e02b2e555b5188d01668f2e4fa09507"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "aes",
  "base64",
@@ -769,8 +768,7 @@ dependencies = [
 [[package]]
 name = "nostr-sdk"
 version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f424ef65e24900885e4ec03b5dddb97baa7ead89ce5ef30820cc186350711fe7"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "gloo-timers",
  "log",
@@ -785,8 +783,7 @@ dependencies = [
 [[package]]
 name = "nostr-sdk-net"
 version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d9a530ec3e9998f207e1a2a06ddadded76e716b3082c5c7aad6555a6f4099a9"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "futures-util",
  "thiserror",
