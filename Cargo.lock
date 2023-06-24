@@ -746,7 +746,7 @@ dependencies = [
 [[package]]
 name = "nostr"
 version = "0.22.0"
-source = "git+https://github.com/0xtrr/nostr.git?rev=2b5413358979f563948c72b3eb3480427e38577a#2b5413358979f563948c72b3eb3480427e38577a"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "aes",
  "base64",
@@ -768,7 +768,7 @@ dependencies = [
 [[package]]
 name = "nostr-sdk"
 version = "0.22.0"
-source = "git+https://github.com/0xtrr/nostr.git?rev=2b5413358979f563948c72b3eb3480427e38577a#2b5413358979f563948c72b3eb3480427e38577a"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "gloo-timers",
  "log",
@@ -783,7 +783,7 @@ dependencies = [
 [[package]]
 name = "nostr-sdk-net"
 version = "0.22.0"
-source = "git+https://github.com/0xtrr/nostr.git?rev=2b5413358979f563948c72b3eb3480427e38577a#2b5413358979f563948c72b3eb3480427e38577a"
+source = "git+https://github.com/0xtrr/nostr.git?branch=feature/add-nip-58-support-in-eventbuilder#aa3ea5c98cbbf4010f440436d36e3c46dc646e11"
 dependencies = [
  "futures-util",
  "thiserror",

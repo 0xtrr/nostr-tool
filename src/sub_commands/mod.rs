@@ -1,3 +1,4 @@
+pub mod award_badge;
 pub mod broadcast_events;
 pub mod convert_key;
 pub mod create_badge;
