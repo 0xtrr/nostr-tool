@@ -72,6 +72,8 @@ enum Commands {
     CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
     /// Publish award badge event
     AwardBadge(sub_commands::award_badge::AwardBadgeSubCommand),
+    /// Create custom event
+    CustomEvent(sub_commands::custom_event::CustomEventCommand),
 }
 
 fn main() -> Result<()> {
@@ -202,6 +204,12 @@ fn main() -> Result<()> {
             sub_command_args,
         ),
         Commands::AwardBadge(sub_command_args) => sub_commands::award_badge::award_badge(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
+        Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
             args.private_key,
             args.relays,
             args.difficulty_target,
