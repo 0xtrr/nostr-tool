@@ -26,7 +26,7 @@ pub fn delete(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     let event_id_to_delete_hex = parse_key(sub_command_args.event_id.clone())?;

@@ -38,7 +38,7 @@ pub fn create_zap_request(
     difficulty_target: u8,
     sub_command_args: &CreateZapRequestCommand,
 ) -> Result<()> {
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
 
     let content = match &sub_command_args.content {
         Some(content) => content.as_str(),
@@ -78,7 +78,7 @@ pub fn create_zap_request(
         .to_pow_event(&keys, difficulty_target)?;
 
     let prettified_json = serde_json::to_string_pretty(&event).unwrap();
-    println!("");
+    println!();
     println!("{}", prettified_json);
 
     if sub_command_args.output_to_file {
@@ -92,6 +92,6 @@ pub fn create_zap_request(
 fn parse_relays(relays: Vec<String>) -> Vec<UncheckedUrl> {
     relays
         .iter()
-        .map(|relay| UncheckedUrl::from_str(&relay).unwrap())
+        .map(|relay| UncheckedUrl::from_str(relay).unwrap())
         .collect()
 }

@@ -29,7 +29,7 @@ pub fn create_public_channel(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     // Create metadata

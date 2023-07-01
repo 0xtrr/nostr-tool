@@ -39,7 +39,7 @@ pub fn broadcast_textnote(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     // Set up tags

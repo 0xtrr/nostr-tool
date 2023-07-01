@@ -38,7 +38,7 @@ pub fn set_channel_metadata(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
     let client = create_client(&keys, relays.clone(), difficulty_target)?;
 
     // Parse the channel id which can both be hex or bech32 encoded
