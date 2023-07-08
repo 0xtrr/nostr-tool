@@ -54,13 +54,23 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     let events: Option<Vec<EventId>> = sub_command_args.e.as_ref().map(|events| {
         events
             .iter()
-            .map(|e| EventId::from_hex(e.as_str()).expect("Invalid event id"))
+            .map(|e| {
+                if e.starts_with("note1") {
+                    EventId::from_bech32(e.as_str()).expect("Invalid event id")
+                } else {
+                    EventId::from_str(e.as_str()).expect("Invalid event id")
+                }
+            })
             .collect()
     });
 
     let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.p.as_ref().map(|pubs| {
         pubs.iter()
-            .map(|p| XOnlyPublicKey::from_str(p.as_str()).expect("Invalid public key"))
+            .map(|p| {
+                Keys::from_pk_str(p)
+                    .expect("Invlaid public key")
+                    .public_key()
+            })
             .collect()
     });
 
