@@ -98,11 +98,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         serde_json::to_writer_pretty(file, &events).unwrap();
         println!("Wrote {} event(s) to {}", events.len(), output);
     } else {
-        for (i, event) in events.iter().enumerate() {
-            if let Ok(e) = serde_json::to_string_pretty(event) {
-                println!("{i}: {e:#}")
-            }
-        }
+        println!("{}", serde_json::to_string_pretty(&events).unwrap())
     }
 
     Ok(())
