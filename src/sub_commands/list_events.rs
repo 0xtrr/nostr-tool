@@ -99,11 +99,11 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     )?;
 
     if let Some(output) = &sub_command_args.output {
-        let file = std::fs::File::create(output).unwrap();
-        serde_json::to_writer_pretty(file, &events).unwrap();
+        let file = std::fs::File::create(output)?;
+        serde_json::to_writer_pretty(file, &events)?;
         println!("Wrote {} event(s) to {}", events.len(), output);
     } else {
-        println!("{}", serde_json::to_string_pretty(&events).unwrap())
+        println!("{}", serde_json::to_string_pretty(&events)?)
     }
 
     Ok(())
