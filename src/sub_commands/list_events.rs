@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, time::Duration};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
@@ -37,6 +37,9 @@ pub struct ListEventsSubCommand {
     /// Output
     #[arg(short, long)]
     output: Option<String>,
+    /// Timeout in seconds
+    #[arg(long)]
+    timeout: Option<u64>,
 }
 
 pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
@@ -74,6 +77,8 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             .collect()
     });
 
+    let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
+
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
             ids: sub_command_args.ids.clone(),
@@ -90,7 +95,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             custom: Map::new(),
             identifiers: sub_command_args.d.clone(),
         }],
-        None,
+        timeout,
     )?;
 
     if let Some(output) = &sub_command_args.output {
