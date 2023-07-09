@@ -1,6 +1,6 @@
 [package]
 name = "nostr-tool"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A CLI tool to interact with nostr"
 authors = ["0xtr <oxtrr@protonmail.com>"]

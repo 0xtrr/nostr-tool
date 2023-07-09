@@ -799,7 +799,7 @@ dependencies = [
 
 [[package]]
 name = "nostr-tool"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "clap",
  "csv",
