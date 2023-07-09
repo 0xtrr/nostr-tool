@@ -68,10 +68,10 @@ enum Commands {
     CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
     /// Send a zap receipt note.
     CreateZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
-    /// Create a new badge
-    CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
-    /// Publish award badge event
-    AwardBadge(sub_commands::award_badge::AwardBadgeSubCommand),
+    // /// Create a new badge
+    // CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
+    // /// Publish award badge event
+    // AwardBadge(sub_commands::award_badge::AwardBadgeSubCommand),
     /// Create custom event
     CustomEvent(sub_commands::custom_event::CustomEventCommand),
 }
@@ -197,18 +197,18 @@ fn main() -> Result<()> {
                 sub_command_args,
             )
         }
-        Commands::CreateBadge(sub_command_args) => sub_commands::create_badge::create_badge(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
-        Commands::AwardBadge(sub_command_args) => sub_commands::award_badge::award_badge(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
+        // Commands::CreateBadge(sub_command_args) => sub_commands::create_badge::create_badge(
+        //     args.private_key,
+        //     args.relays,
+        //     args.difficulty_target,
+        //     sub_command_args,
+        // ),
+        // Commands::AwardBadge(sub_command_args) => sub_commands::award_badge::award_badge(
+        //     args.private_key,
+        //     args.relays,
+        //     args.difficulty_target,
+        //     sub_command_args,
+        // ),
         Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
             args.private_key,
             args.relays,
