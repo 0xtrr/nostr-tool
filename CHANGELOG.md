@@ -9,6 +9,9 @@
 - Add LUD-16 to update metadata command by [@w3irdrobot](https://github.com/w3irdrobot)
 - Add support for creating NIP-57 events (Zaps) by [@0xtrr](https://github.com/0xtrr)
 - Add support for custom events with arbitrary kind, content and tags by [@0xtrr](https://github.com/0xtrr)
+- Add timeout argument for list-events command by [@thesimplekid](https://github.com/thesimplekid)
+- Add bech32 support pubkeys and events for list-events command by [@thesimplekid](https://github.com/thesimplekid)
+
 
 ### Changed
 - Upgrade nostr-sdk from 0.18 to 0.20 by [@thesimplekid](https://github.com/thesimplekid)
@@ -16,6 +19,8 @@
 - Upgrade nostr-sdk from 0.21 to 0.22 by [@0xtrr](https://github.com/0xtrr)
 - Remove bitcoin dependency by [@thesimplekid](https://github.com/thesimplekid)
 
+### Fixed
+- Print events as valid json in list-events command by [@thesimplekid](https://github.com/thesimplekid)
 
 ## 0.3.0 - 2023-02-20
 
