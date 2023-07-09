@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, time::Duration};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
@@ -37,6 +37,9 @@ pub struct ListEventsSubCommand {
     /// Output
     #[arg(short, long)]
     output: Option<String>,
+    /// Timeout in seconds
+    #[arg(long)]
+    timeout: Option<u64>,
 }
 
 pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
@@ -54,15 +57,27 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
     let events: Option<Vec<EventId>> = sub_command_args.e.as_ref().map(|events| {
         events
             .iter()
-            .map(|e| EventId::from_hex(e.as_str()).expect("Invalid event id"))
+            .map(|e| {
+                if e.starts_with("note1") {
+                    EventId::from_bech32(e.as_str()).expect("Invalid event id")
+                } else {
+                    EventId::from_str(e.as_str()).expect("Invalid event id")
+                }
+            })
             .collect()
     });
 
     let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.p.as_ref().map(|pubs| {
         pubs.iter()
-            .map(|p| XOnlyPublicKey::from_str(p.as_str()).expect("Invalid public key"))
+            .map(|p| {
+                Keys::from_pk_str(p)
+                    .expect("Invlaid public key")
+                    .public_key()
+            })
             .collect()
     });
+
+    let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
 
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
@@ -80,19 +95,15 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             custom: Map::new(),
             identifiers: sub_command_args.d.clone(),
         }],
-        None,
+        timeout,
     )?;
 
     if let Some(output) = &sub_command_args.output {
-        let file = std::fs::File::create(output).unwrap();
-        serde_json::to_writer_pretty(file, &events).unwrap();
+        let file = std::fs::File::create(output)?;
+        serde_json::to_writer_pretty(file, &events)?;
         println!("Wrote {} event(s) to {}", events.len(), output);
     } else {
-        for (i, event) in events.iter().enumerate() {
-            if let Ok(e) = serde_json::to_string_pretty(event) {
-                println!("{i}: {e:#}")
-            }
-        }
+        println!("{}", serde_json::to_string_pretty(&events)?)
     }
 
     Ok(())
