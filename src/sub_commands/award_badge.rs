@@ -44,7 +44,11 @@ pub fn award_badge(
     let badge_definition_event = badge_definition_query.get(0).unwrap();
     // Verify that this event is a badge definition event
     if badge_definition_event.kind != Kind::BadgeDefinition {
-        eprintln!("Unexpected badge definition event. Exepected event of kind {} but got {}", Kind::BadgeDefinition.as_u32(), badge_definition_event.kind.as_u32());
+        eprintln!(
+            "Unexpected badge definition event. Exepected event of kind {} but got {}",
+            Kind::BadgeDefinition.as_u32(),
+            badge_definition_event.kind.as_u32()
+        );
         exit(1)
     }
 
