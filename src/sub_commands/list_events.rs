@@ -79,24 +79,23 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
 
-    let events: Vec<Event> = client.get_events_of(
-        vec![Filter {
-            ids: sub_command_args.ids.clone(),
-            authors: sub_command_args.authors.clone(),
-            kinds,
-            events,
-            pubkeys,
-            hashtags: None,
-            references: None,
-            search: None,
-            since: sub_command_args.since.map(Timestamp::from),
-            until: sub_command_args.until.map(Timestamp::from),
-            limit: sub_command_args.limit,
-            custom: Map::new(),
-            identifiers: sub_command_args.d.clone(),
-        }],
-        timeout,
-    )?;
+    let filter = Filter {
+        ids: sub_command_args.ids.clone(),
+        authors: sub_command_args.authors.clone(),
+        kinds,
+        events,
+        pubkeys,
+        hashtags: None,
+        references: None,
+        search: None,
+        since: sub_command_args.since.map(Timestamp::from),
+        until: sub_command_args.until.map(Timestamp::from),
+        limit: sub_command_args.limit,
+        custom: Map::new(),
+        identifiers: sub_command_args.d.clone(),
+    };
+
+    let events: Vec<Event> = client.get_events_of(vec![filter], timeout)?;
 
     if let Some(output) = &sub_command_args.output {
         let file = std::fs::File::create(output)?;
