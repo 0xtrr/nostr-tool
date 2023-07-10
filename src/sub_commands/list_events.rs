@@ -88,7 +88,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         for atag in sub_command_args.atag.clone().unwrap().iter() {
             custom.insert(
                 "#a".to_string(),
-                Value::Array(vec![Value::String(atag.to_string())])
+                Value::Array(vec![Value::String(atag.to_string())]),
             );
         }
     }
