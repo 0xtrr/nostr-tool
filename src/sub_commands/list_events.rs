@@ -17,14 +17,17 @@ pub struct ListEventsSubCommand {
     #[arg(short, long, action = clap::ArgAction::Append)]
     kinds: Option<Vec<u64>>,
     /// e tag
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    e: Option<Vec<String>>,
+    #[arg(long, action = clap::ArgAction::Append)]
+    etag: Option<Vec<String>>,
     /// p tag
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    p: Option<Vec<String>>,
+    #[arg(long, action = clap::ArgAction::Append)]
+    ptag: Option<Vec<String>>,
     /// d tag
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    d: Option<Vec<String>>,
+    #[arg(long, action = clap::ArgAction::Append)]
+    dtag: Option<Vec<String>>,
+    /// a tag
+    #[arg(long, action = clap::ArgAction::Append)]
+    atag: Option<Vec<String>>,
     /// Since
     #[arg(short, long, action = clap::ArgAction::Append)]
     since: Option<u64>,
@@ -54,7 +57,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         .as_ref()
         .map(|kinds| kinds.iter().map(|k| Kind::from(*k)).collect());
 
-    let events: Option<Vec<EventId>> = sub_command_args.e.as_ref().map(|events| {
+    let events: Option<Vec<EventId>> = sub_command_args.etag.as_ref().map(|events| {
         events
             .iter()
             .map(|e| {
@@ -67,7 +70,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             .collect()
     });
 
-    let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.p.as_ref().map(|pubs| {
+    let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.ptag.as_ref().map(|pubs| {
         pubs.iter()
             .map(|p| {
                 Keys::from_pk_str(p)
@@ -77,7 +80,18 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
             .collect()
     });
 
-    let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
+    let timeout = sub_command_args.timeout.map(Duration::from_secs);
+
+    let mut custom = Map::new();
+    // Add a tags
+    if sub_command_args.atag.is_some() {
+        for atag in sub_command_args.atag.clone().unwrap().iter() {
+            custom.insert(
+                "#a".to_string(),
+                Value::Array(vec![Value::String(atag.to_string())])
+            );
+        }
+    }
 
     let filter = Filter {
         ids: sub_command_args.ids.clone(),
@@ -91,8 +105,8 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         since: sub_command_args.since.map(Timestamp::from),
         until: sub_command_args.until.map(Timestamp::from),
         limit: sub_command_args.limit,
-        custom: Map::new(),
-        identifiers: sub_command_args.d.clone(),
+        custom,
+        identifiers: sub_command_args.dtag.clone(),
     };
 
     let events: Vec<Event> = client.get_events_of(vec![filter], timeout)?;
