@@ -23,7 +23,7 @@ pub fn recommend_relay(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex)?;
+    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
     let client = create_client(&keys, relays, difficulty_target)?;
 
     client.add_recommended_relay(sub_command_args.url.clone())?;

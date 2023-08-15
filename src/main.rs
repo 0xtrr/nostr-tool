@@ -64,8 +64,16 @@ enum Commands {
     Nprofile(sub_commands::nprofile::NprofileSubCommand),
     /// Broadcast events from file
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
-    /// Create a resource (kind 9 note). Experimental.
-    CreateResource(sub_commands::resource::ResourceSubCommand),
+    /// Create a zap request. Currently just prints the json to console, you need to send the HTTP request yourself.
+    CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
+    /// Send a zap receipt note.
+    CreateZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
+    // /// Create a new badge
+    // CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
+    // /// Publish award badge event
+    // AwardBadge(sub_commands::award_badge::AwardBadgeSubCommand),
+    /// Create custom event
+    CustomEvent(sub_commands::custom_event::CustomEventCommand),
 }
 
 fn main() -> Result<()> {
@@ -174,7 +182,34 @@ fn main() -> Result<()> {
         Commands::BroadcastEvents(sub_command_args) => {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
         }
-        Commands::CreateResource(sub_command_args) => sub_commands::resource::create_resource(
+        Commands::CreateZapRequest(sub_command_args) => {
+            sub_commands::zap_request::create_zap_request(
+                args.private_key,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        Commands::CreateZapReceipt(sub_command_args) => {
+            sub_commands::zap_reciept::send_zap_receipt(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+        }
+        // Commands::CreateBadge(sub_command_args) => sub_commands::create_badge::create_badge(
+        //     args.private_key,
+        //     args.relays,
+        //     args.difficulty_target,
+        //     sub_command_args,
+        // ),
+        // Commands::AwardBadge(sub_command_args) => sub_commands::award_badge::award_badge(
+        //     args.private_key,
+        //     args.relays,
+        //     args.difficulty_target,
+        //     sub_command_args,
+        // ),
+        Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
             args.private_key,
             args.relays,
             args.difficulty_target,

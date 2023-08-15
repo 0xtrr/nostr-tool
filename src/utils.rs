@@ -1,7 +1,7 @@
 use nostr_sdk::blocking::Client;
 use nostr_sdk::prelude::*;
 
-pub fn handle_keys(private_key: Option<String>, hex: bool) -> Result<Keys> {
+pub fn handle_keys(private_key: Option<String>, hex: bool, print_keys: bool) -> Result<Keys> {
     // Parse and validate private key
     let keys = match private_key {
         Some(pk) => {
@@ -10,18 +10,23 @@ pub fn handle_keys(private_key: Option<String>, hex: bool) -> Result<Keys> {
         }
         None => {
             // create a new identity with a new keypair
-            println!("No private key provided, creating new identity");
+            if print_keys {
+                println!("No private key provided, creating new identity");
+            }
             Keys::generate()
         }
     };
 
-    if !hex {
-        println!("Private key: {}", keys.secret_key()?.to_bech32()?);
-        println!("Public key: {}", keys.public_key().to_bech32()?);
-    } else {
-        println!("Private key: {}", keys.secret_key()?.display_secret());
-        println!("Public key: {}", keys.public_key());
+    if print_keys {
+        if !hex {
+            println!("Private key: {}", keys.secret_key()?.to_bech32()?);
+            println!("Public key: {}", keys.public_key().to_bech32()?);
+        } else {
+            println!("Private key: {}", keys.secret_key()?.display_secret());
+            println!("Public key: {}", keys.public_key());
+        }
     }
+
     Ok(keys)
 }
 
