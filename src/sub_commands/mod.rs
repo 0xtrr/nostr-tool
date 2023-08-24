@@ -11,6 +11,7 @@ pub mod hide_public_channel_message;
 pub mod list_events;
 pub mod mute_publickey;
 pub mod nprofile;
+pub mod profile_badges;
 pub mod publish_contactlist_csv;
 pub mod react;
 pub mod recommend_relay;
