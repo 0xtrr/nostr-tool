@@ -1,4 +1,4 @@
-use std::{str::FromStr, time::Duration, collections::HashMap};
+use std::{collections::HashMap, str::FromStr, time::Duration};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
