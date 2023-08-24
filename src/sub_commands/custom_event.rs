@@ -53,7 +53,7 @@ pub fn create_custom_event(
     for tag in sub_command_args.tags.clone().iter() {
         let parts: Vec<String> = tag.split('|').map(String::from).collect();
         let tag_kind = parts.get(0).unwrap().clone();
-        tags.push(Tag::Generic(TagKind::Custom(tag_kind), parts));
+        tags.push(Tag::Generic(TagKind::Custom(tag_kind), parts[1..].to_vec()));
     }
 
     // Initialize event builder
