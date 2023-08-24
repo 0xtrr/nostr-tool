@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.4.0 - TBD
+## 0.5.0 - TBD
+
+### Added
+
+### Changed
+- Upgrade nostr-sdk from 0.22.0 to 0.23.0 by [@0xtrr](https://github.com/0xtrr)
+
+### Fixed
+
+## 0.4.0 - 2023-06-09
 
 ### Added
 - Save output from list-events to file by [@thesimplekid](https://github.com/thesimplekid)
