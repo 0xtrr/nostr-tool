@@ -12,18 +12,18 @@ pub struct UserStatusSubCommand {
     /// Text note content
     #[arg(short, long)]
     content: String,
-    /// Status type tag
+    /// Status type (identifier tag)
     #[arg(short, long)]
     status_type: Option<String>,
     /// Pubkey references. Both hex and bech32 encoded keys are supported.
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    ptag: Vec<String>,
-    /// Event references
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    etag: Vec<String>,
+    #[arg(short, long)]
+    ptag: Option<String>,
+    /// Event references. Both hex and bech32 encoded keys are supported.
+    #[arg(short, long)]
+    etag: Option<String>,
     /// Reference tag
-    #[arg(short, long, action = clap::ArgAction::Append)]
-    rtag: Vec<String>,
+    #[arg(short, long)]
+    rtag: Option<String>,
     /// Seconds till expiration (NIP-40)
     #[arg(long)]
     expiration: Option<u64>,
@@ -60,24 +60,23 @@ pub fn set_user_status(
         tags.push(Tag::Expiration(timestamp));
     }
 
-    // Add p-tags
-    for ptag in sub_command_args.ptag.iter() {
-        // Parse pubkey to ensure we're sending hex keys
-        let pubkey_hex = parse_key(ptag.clone())?;
+    // Add p-tag
+    if let Some(p) = sub_command_args.ptag.clone() {
+        let pubkey_hex = parse_key(p)?;
         let pubkey = XOnlyPublicKey::from_str(&pubkey_hex)?;
-        tags.push(Tag::PubKey(pubkey, None));
+        tags.push(Tag::PubKey(pubkey, None))
     }
 
     // Add e-tag
-    for etag in sub_command_args.etag.iter() {
-        let event_id = EventId::from_hex(etag)?;
+    if let Some(e) = sub_command_args.etag.clone() {
+        let event_id_hex = parse_key(e)?;
+        let event_id = EventId::from_hex(event_id_hex)?;
         tags.push(Tag::Event(event_id, None, None));
     }
 
-    // Add r-tags
-    for rtag in sub_command_args.rtag.iter() {
-        let reference_tag = Tag::Reference(rtag.to_string());
-        tags.push(reference_tag);
+    // Add r-tag
+    if let Some(r) = sub_command_args.rtag.clone() {
+        tags.push(Tag::Reference(r));
     }
 
     // Publish event
