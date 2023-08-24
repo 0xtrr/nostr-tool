@@ -90,14 +90,14 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
         })
         .collect();
 
-    let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
+    let timeout = sub_command_args.timeout.map(Duration::from_secs);
 
     let identifiers = sub_command_args.d.clone().unwrap_or(Vec::new());
 
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
-            ids: ids,
-            authors: authors,
+            ids,
+            authors,
             kinds,
             events,
             pubkeys,
