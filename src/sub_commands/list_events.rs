@@ -67,7 +67,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     // Convert event id string to EventId struct
     let events: Vec<EventId> = sub_command_args
-        .e
+        .etag
         .clone()
         .unwrap_or(Vec::new())
         .into_iter()
@@ -82,7 +82,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     // Convert pubkey strings to XOnlyPublicKey struct
     let pubkeys: Vec<XOnlyPublicKey> = sub_command_args
-        .p
+        .ptag
         .clone()
         .unwrap_or(Vec::new())
         .into_iter()
@@ -95,7 +95,7 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     let timeout = sub_command_args.timeout.map(Duration::from_secs);
 
-    let identifiers = sub_command_args.d.clone().unwrap_or(Vec::new());
+    let identifiers = sub_command_args.dtag.clone().unwrap_or(Vec::new());
 
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
