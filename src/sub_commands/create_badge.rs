@@ -1,5 +1,5 @@
 use clap::Args;
-use nostr_sdk::{nips::nip58::ImageDimensions, prelude::*};
+use nostr_sdk::prelude::*;
 
 use crate::utils::{create_client, handle_keys};
 
@@ -54,7 +54,7 @@ pub fn create_badge(
         sub_command_args.image_size_height,
         sub_command_args.image_size_width,
     ) {
-        (Some(height), Some(width)) => Some(ImageDimensions(height, width)),
+        (Some(height), Some(width)) => Some(ImageDimensions { height, width }),
         _ => None,
     };
 
@@ -67,20 +67,25 @@ pub fn create_badge(
             _ => None,
         };
 
+        let url = UncheckedUrl::from(thumb_url);
+
         if let Some((width, height)) = thumb_size {
-            Some(vec![(thumb_url, Some(ImageDimensions(width, height)))])
+            Some(vec![(url, Some(ImageDimensions { width, height }))])
         } else {
-            Some(vec![(thumb_url, None)])
+            Some(vec![(url, None)])
         }
     } else {
         None
     };
 
+    let image_url: Option<UncheckedUrl> =
+        sub_command_args.image_url.clone().map(UncheckedUrl::from);
+
     let event = EventBuilder::define_badge(
         sub_command_args.id.clone(),
         sub_command_args.name.clone(),
         sub_command_args.description.clone(),
-        sub_command_args.image_url.clone(),
+        image_url,
         image_size,
         thumbnails,
     )
