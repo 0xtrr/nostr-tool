@@ -5,6 +5,7 @@
 ### Added
 - Support for NIP-58 Badges by [@0xtrr](https://github.com/0xtrr)
 - Add support for a tags in list events command by [@0xtrr](https://github.com/0xtrr)
+- Add support for NIP-315 user statuses by [@0xtrr](https://github.com/0xtrr)
 
 ### Changed
 - Upgrade nostr-sdk from 0.22.0 to 0.23.0 by [@0xtrr](https://github.com/0xtrr)

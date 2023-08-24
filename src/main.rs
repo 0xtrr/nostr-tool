@@ -76,6 +76,8 @@ enum Commands {
     ProfileBadges(sub_commands::profile_badges::ProfileBadgesSubCommand),
     /// Create custom event
     CustomEvent(sub_commands::custom_event::CustomEventCommand),
+    /// Create a user status event
+    SetUserStatus(sub_commands::user_status::UserStatusSubCommand),
 }
 
 fn main() -> Result<()> {
@@ -220,6 +222,12 @@ fn main() -> Result<()> {
             )
         }
         Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
+        Commands::SetUserStatus(sub_command_args) => sub_commands::user_status::set_user_status(
             args.private_key,
             args.relays,
             args.difficulty_target,
