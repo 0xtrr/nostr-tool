@@ -43,12 +43,12 @@ pub fn send_zap_receipt(
     // Read in json from specified file
     let event_json: String = fs::read_to_string(sub_command_args.zap_request_json_path.clone())?;
     // Create Event from json
-    let event = Event::from_json(event_json)?;
+    let zap_request_event = Event::from_json(event_json)?;
 
-    let event: Event = EventBuilder::new_zap(
+    let event: Event = EventBuilder::new_zap_receipt(
         sub_command_args.bolt11.clone(),
         sub_command_args.preimage.clone(),
-        event,
+        zap_request_event,
     )
     .to_pow_event(&keys, difficulty_target)?;
 

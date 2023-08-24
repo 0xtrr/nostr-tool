@@ -1,4 +1,4 @@
-use std::{str::FromStr, time::Duration};
+use std::{collections::HashMap, str::FromStr, time::Duration};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
@@ -49,51 +49,66 @@ pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand)
 
     let client = create_client(&Keys::generate(), relays, 0)?;
 
-    let kinds: Option<Vec<Kind>> = sub_command_args
+    let ids: Vec<String> = sub_command_args.ids.clone().unwrap_or(Vec::new());
+
+    let authors: Vec<String> = sub_command_args.authors.clone().unwrap_or(Vec::new());
+
+    // Convert kind number to Kind struct
+    let kinds: Vec<Kind> = sub_command_args
         .kinds
-        .as_ref()
-        .map(|kinds| kinds.iter().map(|k| Kind::from(*k)).collect());
+        .clone()
+        .unwrap_or(Vec::new())
+        .into_iter()
+        .map(Kind::from)
+        .collect();
 
-    let events: Option<Vec<EventId>> = sub_command_args.e.as_ref().map(|events| {
-        events
-            .iter()
-            .map(|e| {
-                if e.starts_with("note1") {
-                    EventId::from_bech32(e.as_str()).expect("Invalid event id")
-                } else {
-                    EventId::from_str(e.as_str()).expect("Invalid event id")
-                }
-            })
-            .collect()
-    });
+    // Convert event id string to EventId struct
+    let events: Vec<EventId> = sub_command_args
+        .e
+        .clone()
+        .unwrap_or(Vec::new())
+        .into_iter()
+        .map(|e| {
+            if e.starts_with("note1") {
+                EventId::from_bech32(e.as_str()).expect("Invalid event id")
+            } else {
+                EventId::from_str(e.as_str()).expect("Invalid event id")
+            }
+        })
+        .collect();
 
-    let pubkeys: Option<Vec<XOnlyPublicKey>> = sub_command_args.p.as_ref().map(|pubs| {
-        pubs.iter()
-            .map(|p| {
-                Keys::from_pk_str(p)
-                    .expect("Invlaid public key")
-                    .public_key()
-            })
-            .collect()
-    });
+    // Convert pubkey strings to XOnlyPublicKey struct
+    let pubkeys: Vec<XOnlyPublicKey> = sub_command_args
+        .p
+        .clone()
+        .unwrap_or(Vec::new())
+        .into_iter()
+        .map(|p| {
+            Keys::from_pk_str(p.as_str())
+                .expect("Invalid public key")
+                .public_key()
+        })
+        .collect();
 
-    let timeout = sub_command_args.timeout.map(|t| Duration::from_secs(t));
+    let timeout = sub_command_args.timeout.map(Duration::from_secs);
+
+    let identifiers = sub_command_args.d.clone().unwrap_or(Vec::new());
 
     let events: Vec<Event> = client.get_events_of(
         vec![Filter {
-            ids: sub_command_args.ids.clone(),
-            authors: sub_command_args.authors.clone(),
+            ids,
+            authors,
             kinds,
             events,
             pubkeys,
-            hashtags: None,
-            references: None,
+            hashtags: Vec::new(),
+            references: Vec::new(),
             search: None,
             since: sub_command_args.since.map(Timestamp::from),
             until: sub_command_args.until.map(Timestamp::from),
             limit: sub_command_args.limit,
-            custom: Map::new(),
-            identifiers: sub_command_args.d.clone(),
+            identifiers,
+            generic_tags: HashMap::new(),
         }],
         timeout,
     )?;
