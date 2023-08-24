@@ -34,7 +34,7 @@ pub fn send(
     let hex_pubkey = parse_key(sub_command_args.receiver.clone())?;
     let receiver = XOnlyPublicKey::from_str(&hex_pubkey)?;
 
-    let event_id = client?.send_direct_msg(receiver, sub_command_args.message.clone())?;
+    let event_id = client?.send_direct_msg(receiver, sub_command_args.message.clone(), None)?;
     if !sub_command_args.hex {
         println!(
             "Message sent to {}, event id: {}",
