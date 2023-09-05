@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 - TBD
+## 0.5.0 - 2023-09-05
 
 ### Added
 - Support for NIP-58 Badges by [@0xtrr](https://github.com/0xtrr)
@@ -9,7 +9,6 @@
 
 ### Changed
 - Upgrade nostr-sdk from 0.22.0 to 0.23.0 by [@0xtrr](https://github.com/0xtrr)
-- 
 
 ### Fixed
 
