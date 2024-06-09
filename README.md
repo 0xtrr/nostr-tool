@@ -39,6 +39,12 @@ docker build -t nostr-tool .
 docker pull 0xtr/nostr-tool:0.3.0
 ```
 
+### Build with Nix locally
+```shell
+nix develop 
+cargo build --release
+```
+
 Run `nostr-tools` command once to get the standard help menu up. Each subcommand also has it's own help menu accessed by appending the --help flag.
 
 ## Examples
