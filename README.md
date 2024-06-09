@@ -97,6 +97,18 @@ nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} send-direct-message --receiv
 nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} delete-event -e {EVENT_ID} -r "The reason for deleting the event"
 ```
 
+### Delete a profile
+
+Just events:
+```shell
+nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} delete-profile --events-only --kinds 1
+```
+
+Delete metadata profile:
+```shell
+nostr-tool -r wss://nostr.oxtr.dev -p {PRIVATE_KEY} delete-profile
+```
+
 ### React to an event
 
 ```shell
