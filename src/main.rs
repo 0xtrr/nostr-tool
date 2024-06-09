@@ -38,6 +38,8 @@ enum Commands {
     SendDirectMessage(sub_commands::dm::SendDirectMessageSubCommand),
     /// Delete an event
     DeleteEvent(sub_commands::delete_event::DeleteEventSubCommand),
+    /// Delete a profile
+    DeleteProfile(sub_commands::delete_profile::DeleteProfileSubCommand),
     /// React to an event
     React(sub_commands::react::ReactionSubCommand),
     /// Get all events
@@ -123,6 +125,12 @@ fn main() -> Result<()> {
             sub_command_args,
         ),
         Commands::DeleteEvent(sub_command_args) => sub_commands::delete_event::delete(
+            args.private_key,
+            args.relays,
+            args.difficulty_target,
+            sub_command_args,
+        ),
+        Commands::DeleteProfile(sub_command_args) => sub_commands::delete_profile::delete(
             args.private_key,
             args.relays,
             args.difficulty_target,

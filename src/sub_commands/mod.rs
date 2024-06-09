@@ -5,6 +5,7 @@ pub mod create_badge;
 pub mod create_public_channel;
 pub mod custom_event;
 pub mod delete_event;
+pub mod delete_profile;
 pub mod dm;
 pub mod generate_keypair;
 pub mod hide_public_channel_message;
