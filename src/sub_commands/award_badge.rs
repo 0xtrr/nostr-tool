@@ -41,7 +41,7 @@ pub async fn award_badge(
         exit(1)
     };
 
-    let badge_definition_event = badge_definition_query.get(0).unwrap();
+    let badge_definition_event = badge_definition_query.first().unwrap();
     // Verify that this event is a badge definition event
     if badge_definition_event.kind != Kind::BadgeDefinition {
         eprintln!(

@@ -6,7 +6,7 @@ use clap::Args;
 use nostr_sdk::prelude::*;
 use nostr_sdk::TagKind::SingleLetter;
 
-use crate::utils::{create_client, parse_key_or_id, parse_private_key};
+use crate::utils::{create_client, parse_key_or_id_to_hex_string, parse_private_key};
 
 #[derive(Args)]
 pub struct UserStatusSubCommand {
@@ -63,14 +63,14 @@ pub async fn set_user_status(
 
     // Add p-tag
     if let Some(p) = sub_command_args.ptag.clone() {
-        let pubkey_hex = parse_key_or_id(p).await?;
+        let pubkey_hex = parse_key_or_id_to_hex_string(p).await?;
         let pubkey: PublicKey = PublicKey::from_str(&pubkey_hex)?;
         tags.push(Tag::public_key(pubkey))
     }
 
     // Add e-tag
     if let Some(e) = sub_command_args.etag.clone() {
-        let event_id_hex = parse_key_or_id(e).await?;
+        let event_id_hex = parse_key_or_id_to_hex_string(e).await?;
         let event_id: EventId = EventId::from_hex(event_id_hex)?;
         tags.push(Tag::event(event_id));
     }

@@ -61,7 +61,7 @@ pub async fn list_events(
         let ids: Vec<EventId> = sub_command_args
             .ids
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .iter()
             .map(|id| EventId::from_str(id).unwrap())
             .collect();
@@ -73,7 +73,7 @@ pub async fn list_events(
         let authors: Vec<PublicKey> = sub_command_args
             .authors
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .iter()
             .map(|author_pubkey| PublicKey::from_str(author_pubkey).unwrap())
             .collect();
@@ -86,7 +86,7 @@ pub async fn list_events(
         let kinds: Vec<Kind> = sub_command_args
             .kinds
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .into_iter()
             .map(|x| x as u16)
             .map(Kind::from)
@@ -100,7 +100,7 @@ pub async fn list_events(
         let events: Vec<EventId> = sub_command_args
             .etag
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .into_iter()
             .map(|e| {
                 if e.starts_with("note1") {
@@ -119,7 +119,7 @@ pub async fn list_events(
         let pubkeys: Vec<PublicKey> = sub_command_args
             .ptag
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .into_iter()
             .map(|p| PublicKey::from_str(p.as_str()).expect("Invalid public key"))
             .collect();
@@ -128,7 +128,7 @@ pub async fn list_events(
 
     // Handle d-tags
     if sub_command_args.dtag.is_some() {
-        filter = filter.identifiers(sub_command_args.dtag.clone().unwrap_or(Vec::new()));
+        filter = filter.identifiers(sub_command_args.dtag.clone().unwrap_or_default());
     }
 
     if sub_command_args.since.is_some() {

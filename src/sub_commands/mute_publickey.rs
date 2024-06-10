@@ -37,7 +37,7 @@ pub async fn mute_publickey(
 
     println!(
         "Public key {} muted in event {}",
-        pubkey_to_mute.to_string(),
+        pubkey_to_mute,
         event_id
     );
 

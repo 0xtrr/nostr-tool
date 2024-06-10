@@ -48,7 +48,7 @@ pub async fn delete(
         let kinds: Vec<Kind> = sub_command_args
             .kinds
             .clone()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .into_iter()
             .map(|x| x as u16)
             .map(Kind::from)
@@ -67,7 +67,7 @@ pub async fn delete(
 
         let delete_event: Event = EventBuilder::delete_with_reason(
             event_ids,
-            sub_command_args.reason.clone().unwrap_or(String::new()),
+            sub_command_args.reason.clone().unwrap_or_default(),
         )
         .to_pow_event(&keys, difficulty_target)
         .unwrap();

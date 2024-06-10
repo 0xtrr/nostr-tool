@@ -8,28 +8,28 @@ pub struct CreateBadgeSubCommand {
     /// Unique identifier for the badge
     #[arg(short, long)]
     id: String,
-    ///
+    /// Badge name
     #[arg(short, long)]
     name: Option<String>,
-    ///
+    /// Badge description
     #[arg(short, long)]
     description: Option<String>,
-    ///
+    /// Badge image url
     #[arg(long)]
     image_url: Option<String>,
-    ///
+    /// Badge image width
     #[arg(long)]
     image_size_width: Option<u64>,
-    ///
+    /// Badge image height
     #[arg(long)]
     image_size_height: Option<u64>,
-    ///
+    /// Badge thumbnail image url
     #[arg(short, long)]
     thumb_url: Option<String>,
-    ///
+    /// Badge thumbnail width
     #[arg(long)]
     thumb_size_width: Option<u64>,
-    ///
+    /// Badge thumbnail height
     #[arg(long)]
     thumb_size_height: Option<u64>,
 }

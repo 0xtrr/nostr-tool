@@ -2,9 +2,8 @@ use std::str::FromStr;
 
 use clap::Args;
 use nostr_sdk::prelude::*;
-use nostr_sdk::secp256k1::XOnlyPublicKey;
 
-use crate::utils::Prefix;
+use crate::utils::{parse_key_or_id_to_hex_string, Prefix};
 
 #[derive(Args)]
 pub struct ConvertKeySubCommand {
@@ -20,34 +19,20 @@ pub struct ConvertKeySubCommand {
 }
 
 pub async fn convert_key(sub_command_args: &ConvertKeySubCommand) -> Result<()> {
-    let unknown_key = &sub_command_args.key.clone();
-
-    let hex_key = if unknown_key.starts_with("npub") {
-        PublicKey::from_bech32(unknown_key.clone())
-            .unwrap()
-            .to_string()
-    } else if unknown_key.starts_with("nsec") {
-        SecretKey::from_bech32(unknown_key)?
-            .display_secret()
-            .to_string()
-    } else if unknown_key.starts_with("note") {
-        EventId::from_bech32(unknown_key)?.to_hex()
-    } else {
-        // If the key is not bech32 encoded, return it as is
-        unknown_key.clone()
-    };
-
     if sub_command_args.to_hex {
-        println!("{hex_key}");
+        // Input is bech32 encoded so we find the hex value
+        let hex_key_or_id = parse_key_or_id_to_hex_string(sub_command_args.key.clone()).await?;
+        println!("{hex_key_or_id}");
     } else {
+        // Input is hex so we bech32 encode it based on the provided prefix value
         let encoded_key: String = match sub_command_args
             .prefix
             .as_ref()
             .expect("Prefix parameter is missing")
         {
-            Prefix::Npub => XOnlyPublicKey::from_str(hex_key.as_str())?.to_string(),
-            Prefix::Nsec => SecretKey::from_str(hex_key.as_str())?.to_bech32()?,
-            Prefix::Note => EventId::from_hex(hex_key)?.to_bech32()?,
+            Prefix::Npub => PublicKey::from_str(sub_command_args.key.as_str())?.to_bech32()?,
+            Prefix::Nsec => SecretKey::from_str(sub_command_args.key.as_str())?.to_bech32()?,
+            Prefix::Note => EventId::from_str(sub_command_args.key.as_str())?.to_bech32()?,
         };
         println!("{encoded_key}");
     }

@@ -54,7 +54,7 @@ pub async fn create_custom_event(
 
     for tag in sub_command_args.tags.clone().iter() {
         let parts: Vec<String> = tag.split('|').map(String::from).collect();
-        let tag_kind = parts.get(0).unwrap().clone();
+        let tag_kind = parts.first().unwrap().clone();
         tags.push(Tag::custom(
             TagKind::Custom(Cow::from(tag_kind)),
             parts[1..].to_vec(),

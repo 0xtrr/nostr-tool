@@ -52,10 +52,8 @@ pub async fn set_channel_metadata(
         metadata = metadata.picture(Url::parse(picture.as_str()).unwrap());
     }
 
-    let relay_url = match sub_command_args.recommended_relay.clone() {
-        None => None,
-        Some(relay_string) => Some(Url::parse(relay_string.as_str()).unwrap()),
-    };
+    let relay_url = sub_command_args.recommended_relay.clone()
+        .map(|relay_string| Url::parse(relay_string.as_str()).unwrap());
 
     // Build and send event
     let event = EventBuilder::channel_metadata(channel_id, relay_url, &metadata).to_event(&keys)?;

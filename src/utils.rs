@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use std::time::Duration;
 
 use nostr_sdk::prelude::*;
@@ -7,17 +6,16 @@ pub async fn parse_private_key(private_key: Option<String>, print_keys: bool) ->
     // Parse and validate private key
     let keys = match private_key {
         Some(pk) => {
-            // Ensure we get private key in hex format
-            let hex_priv_key = parse_key_or_id(pk).await?;
-            // create a new identity using the provided private key
-            let secret_key = SecretKey::from_str(hex_priv_key.as_str())?;
-            Keys::new(secret_key)
+            if pk.starts_with("nsec") {
+                Keys::new(SecretKey::from_bech32(pk)?)
+            } else {
+                // We assume it's a hex formatted private key
+                Keys::new(SecretKey::from_hex(pk)?)
+            }
         }
         None => {
             // create a new identity with a new keypair
-            if print_keys {
-                println!("No private key provided, creating new identity");
-            }
+            println!("No private key provided, generating new identity");
             Keys::generate()
         }
     };
@@ -47,18 +45,26 @@ pub async fn create_client(keys: &Keys, relays: Vec<String>, difficulty: u8) -> 
     Ok(client)
 }
 
-pub async fn parse_key_or_id(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    if is_bech32(input.as_str()) {
-        let decoded = bech32::decode(input.as_str()).unwrap();
-        let data = hex::encode(decoded.1);
-        Ok(data)
+pub async fn parse_key_or_id_to_hex_string(
+    input: String,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let hex_key_or_id = if input.starts_with("npub") {
+        PublicKey::from_bech32(input.clone()).unwrap().to_hex()
+    } else if input.starts_with("nsec") {
+        SecretKey::from_bech32(input)?.display_secret().to_string()
+    } else if input.starts_with("note") {
+        EventId::from_bech32(input)?.to_hex()
+    } else if input.starts_with("nprofile") {
+        Nip19Profile::from_bech32(input)
+            .unwrap()
+            .public_key
+            .to_hex()
     } else {
-        Ok(input)
-    }
-}
+        // If the key is not bech32 encoded, return it as is
+        input.clone()
+    };
 
-fn is_bech32(s: &str) -> bool {
-    s.starts_with("npub") || s.starts_with("nsec") || s.starts_with("note")
+    Ok(hex_key_or_id)
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]
@@ -82,7 +88,7 @@ mod tests {
     async fn test_parse_key_hex_input() {
         let hex_key =
             String::from("f4deaad98b61fa24d86ef315f1d5d57c1a6a533e1e87e777e5d0b48dcd332cdb");
-        let result = parse_key_or_id(hex_key.clone()).await;
+        let result = parse_key_or_id_to_hex_string(hex_key.clone()).await;
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), hex_key);
@@ -93,7 +99,7 @@ mod tests {
         let bech32_note_id =
             String::from("note1h445ule4je70k7kvddate8kpsh2fd6n77esevww5hmgda2qwssjsw957wk");
 
-        let result = parse_key_or_id(bech32_note_id).await;
+        let result = parse_key_or_id_to_hex_string(bech32_note_id).await;
 
         assert!(result.is_ok());
         assert_eq!(
@@ -106,7 +112,7 @@ mod tests {
     async fn test_parse_bech32_public_key_input() {
         let bech32_encoded_key =
             String::from("npub1ktt8phjnkfmfrsxrgqpztdjuxk3x6psf80xyray0l3c7pyrln49qhkyhz0");
-        let result = parse_key_or_id(bech32_encoded_key).await;
+        let result = parse_key_or_id_to_hex_string(bech32_encoded_key).await;
 
         assert!(result.is_ok());
         assert_eq!(
@@ -119,7 +125,7 @@ mod tests {
     async fn test_parse_bech32_private_key() {
         let bech32_encoded_key =
             String::from("nsec1hdeqm0y8vgzuucqv4840h7rlpy4qfu928ulxh3dzj6s2nqupdtzqagtew3");
-        let result = parse_key_or_id(bech32_encoded_key).await;
+        let result = parse_key_or_id_to_hex_string(bech32_encoded_key).await;
 
         assert!(result.is_ok());
         assert_eq!(
