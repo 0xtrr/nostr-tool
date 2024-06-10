@@ -1,7 +1,7 @@
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct SetChannelMetadataSubCommand {
@@ -32,7 +32,7 @@ pub async fn set_channel_metadata(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays.clone(), difficulty_target).await?;
 
     let channel_id: EventId = EventId::from_hex(sub_command_args.channel_id.clone())?;
@@ -54,7 +54,7 @@ pub async fn set_channel_metadata(
 
     let relay_url = match sub_command_args.recommended_relay.clone() {
         None => None,
-        Some(relay_string) => { Some(Url::parse(relay_string.as_str()).unwrap()) }
+        Some(relay_string) => Some(Url::parse(relay_string.as_str()).unwrap()),
     };
 
     // Build and send event
@@ -62,7 +62,10 @@ pub async fn set_channel_metadata(
     let event_id = client.send_event(event.clone()).await?;
 
     // Print results
-    println!("\nSet new metadata for channel {}!", sub_command_args.channel_id.as_str());
+    println!(
+        "\nSet new metadata for channel {}!",
+        sub_command_args.channel_id.as_str()
+    );
     println!("\nEvent ID:");
     println!("Hex: {}", event_id.to_hex());
     println!("Bech32: {}", event_id.to_bech32()?);

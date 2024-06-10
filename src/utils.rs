@@ -3,12 +3,14 @@ use std::time::Duration;
 
 use nostr_sdk::prelude::*;
 
-pub async fn handle_keys(private_key: Option<String>, print_keys: bool) -> Result<Keys> {
+pub async fn parse_private_key(private_key: Option<String>, print_keys: bool) -> Result<Keys> {
     // Parse and validate private key
     let keys = match private_key {
-        Some(sec_key) => {
+        Some(pk) => {
+            // Ensure we get private key in hex format
+            let hex_priv_key = parse_key_or_id(pk).await?;
             // create a new identity using the provided private key
-            let secret_key = SecretKey::from_str(sec_key.as_str())?;
+            let secret_key = SecretKey::from_str(hex_priv_key.as_str())?;
             Keys::new(secret_key)
         }
         None => {
@@ -45,7 +47,6 @@ pub async fn create_client(keys: &Keys, relays: Vec<String>, difficulty: u8) -> 
     Ok(client)
 }
 
-
 pub async fn parse_key_or_id(input: String) -> Result<String, Box<dyn std::error::Error>> {
     if is_bech32(input.as_str()) {
         let decoded = bech32::decode(input.as_str()).unwrap();
@@ -59,25 +60,6 @@ pub async fn parse_key_or_id(input: String) -> Result<String, Box<dyn std::error
 fn is_bech32(s: &str) -> bool {
     s.starts_with("npub") || s.starts_with("nsec") || s.starts_with("note")
 }
-
-// Accepts both hex and bech32 keys and returns the hex encoded key
-// pub async fn parse_key(key: String) -> Result<Nip19> {
-//     // Check if the key is a bech32 encoded key
-//     let parsed_key = if key.starts_with("npub") {
-//         Nip19::from_bech32(key)?
-//     } else if key.starts_with("nsec") {
-//         Nip19::from_bech32(key)?
-//     } else if key.starts_with("note") {
-//         Nip19::from_bech32(key)?
-//     } else if key.starts_with("nchannel") {
-//         Nip19::from_bech32(key)?
-//     } else {
-//         // If the key is not bech32 encoded, return it as is
-//         // TODO: Handle hex key
-//         panic!("Unable to parse key")
-//     };
-//     Ok(parsed_key)
-// }
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 pub enum Prefix {
@@ -96,12 +78,12 @@ pub enum Keyformat {
 mod tests {
     use super::*;
 
-#[tokio::test]
+    #[tokio::test]
     async fn test_parse_key_hex_input() {
         let hex_key =
             String::from("f4deaad98b61fa24d86ef315f1d5d57c1a6a533e1e87e777e5d0b48dcd332cdb");
         let result = parse_key_or_id(hex_key.clone()).await;
-    
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), hex_key);
     }

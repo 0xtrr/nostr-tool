@@ -1,7 +1,7 @@
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct CreateBadgeSubCommand {
@@ -44,7 +44,7 @@ pub async fn create_badge(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     let image_size = match (
@@ -90,7 +90,7 @@ pub async fn create_badge(
 
     // Publish event
     let event_id = client.send_event(event).await?;
-    println!( "Published badge definition with id:");
+    println!("Published badge definition with id:");
     println!("Hex: {}", event_id.to_hex());
     println!("Bech32: {}", event_id.to_bech32()?);
 

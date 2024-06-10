@@ -1,7 +1,7 @@
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct BroadcastEventsSubCommand {
@@ -18,7 +18,7 @@ pub async fn broadcast_events(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(None, false).await?;
+    let keys = parse_private_key(None, true).await?;
     let client = create_client(&keys, relays.clone(), 0).await?;
 
     let file = std::fs::File::open(&sub_command_args.file_path)?;

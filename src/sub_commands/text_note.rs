@@ -5,7 +5,7 @@ use std::time::Duration;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct TextNoteSubCommand {
@@ -36,7 +36,7 @@ pub async fn broadcast_textnote(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Set up tags
@@ -66,7 +66,9 @@ pub async fn broadcast_textnote(
     }
 
     // Publish event
-    let event_id = client.publish_text_note(sub_command_args.content.clone(), tags).await?;
+    let event_id = client
+        .publish_text_note(sub_command_args.content.clone(), tags)
+        .await?;
     println!("Published text note with id:");
     println!("Hex: {}", event_id.to_hex());
     println!("Bech32: {}", event_id.to_bech32()?);

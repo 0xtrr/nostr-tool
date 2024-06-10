@@ -2,7 +2,7 @@ use clap::Args;
 use nostr_sdk::nostr::nips::nip05;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct UpdateMetadataSubCommand {
@@ -36,7 +36,7 @@ pub async fn update_metadata(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     let mut metadata = Metadata::new();

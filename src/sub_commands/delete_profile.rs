@@ -3,7 +3,7 @@ use std::time::Duration;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct DeleteProfileSubCommand {
@@ -34,7 +34,7 @@ pub async fn delete(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     let timeout = sub_command_args.timeout.map(Duration::from_secs);
@@ -54,8 +54,9 @@ pub async fn delete(
             .map(Kind::from)
             .collect();
 
-        let events: Vec<Event> =
-            client.get_events_of(vec![Filter::new().authors(authors).kinds(kinds)], timeout).await?;
+        let events: Vec<Event> = client
+            .get_events_of(vec![Filter::new().authors(authors).kinds(kinds)], timeout)
+            .await?;
 
         let event_ids: Vec<EventIdOrCoordinate> = events
             .iter()
@@ -67,7 +68,9 @@ pub async fn delete(
         let delete_event: Event = EventBuilder::delete_with_reason(
             event_ids,
             sub_command_args.reason.clone().unwrap_or(String::new()),
-        ).to_pow_event(&keys, difficulty_target).unwrap();
+        )
+        .to_pow_event(&keys, difficulty_target)
+        .unwrap();
 
         let event_id = client.send_event(delete_event).await?;
 

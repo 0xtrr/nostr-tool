@@ -3,7 +3,7 @@ use std::str::FromStr;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct MutePublickeySubCommand {
@@ -25,16 +25,15 @@ pub async fn mute_publickey(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Set up pubkey to mute
     let pubkey_to_mute = key::PublicKey::from_str(sub_command_args.public_key.as_str())?;
 
-    let event_id = client.mute_channel_user(
-        pubkey_to_mute,
-        sub_command_args.reason.clone(),
-    ).await?;
+    let event_id = client
+        .mute_channel_user(pubkey_to_mute, sub_command_args.reason.clone())
+        .await?;
 
     println!(
         "Public key {} muted in event {}",

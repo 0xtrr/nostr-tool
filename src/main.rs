@@ -13,7 +13,7 @@ mod utils;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
-    /// User private key
+    /// Hex or bech32 formatted private key
     #[arg(short, long)]
     private_key: Option<String>,
     /// Relay to connect to
@@ -80,47 +80,61 @@ async fn main() -> Result<()> {
     // Post event
     match &args.command {
         Commands::UpdateMetadata(sub_command_args) => {
-            sub_commands::update_metadata::update_metadata(
-                args.private_key,
-                args.relays,
-                args.difficulty_target,
-                sub_command_args,
-            )
-        }.await,
+            {
+                sub_commands::update_metadata::update_metadata(
+                    args.private_key,
+                    args.relays,
+                    args.difficulty_target,
+                    sub_command_args,
+                )
+            }
+            .await
+        }
         Commands::TextNote(sub_command_args) => {
             sub_commands::text_note::broadcast_textnote(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
-        },
+            )
+            .await
+        }
         Commands::PublishContactListCsv(sub_command_args) => {
             sub_commands::publish_contactlist_csv::publish_contact_list_from_csv_file(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
-        Commands::DeleteEvent(sub_command_args) => sub_commands::delete_event::delete(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
-        Commands::DeleteProfile(sub_command_args) => sub_commands::delete_profile::delete(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
-        Commands::React(sub_command_args) => sub_commands::react::react_to_event(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
+        Commands::DeleteEvent(sub_command_args) => {
+            sub_commands::delete_event::delete(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
+        Commands::DeleteProfile(sub_command_args) => {
+            sub_commands::delete_profile::delete(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
+        Commands::React(sub_command_args) => {
+            sub_commands::react::react_to_event(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
         Commands::ListEvents(sub_command_args) => {
             sub_commands::list_events::list_events(args.relays, sub_command_args).await
         }
@@ -137,7 +151,8 @@ async fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
         Commands::SetChannelMetadata(sub_command_args) => {
             sub_commands::set_channel_metadata::set_channel_metadata(
@@ -145,7 +160,8 @@ async fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
         Commands::SendChannelMessage(sub_command_args) => {
             sub_commands::send_channel_message::send_channel_message(
@@ -153,7 +169,8 @@ async fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
         Commands::HidePublicChannelMessage(sub_command_args) => {
             sub_commands::hide_public_channel_message::hide_public_channel_message(
@@ -161,14 +178,18 @@ async fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
-        Commands::MutePublicKey(sub_command_args) => sub_commands::mute_publickey::mute_publickey(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
+        Commands::MutePublicKey(sub_command_args) => {
+            sub_commands::mute_publickey::mute_publickey(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
         Commands::BroadcastEvents(sub_command_args) => {
             sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args).await
         }
@@ -178,35 +199,44 @@ async fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
-        },
+            )
+            .await
+        }
         Commands::AwardBadge(sub_command_args) => {
             sub_commands::award_badge::award_badge(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
-        },
+            )
+            .await
+        }
         Commands::ProfileBadges(sub_command_args) => {
             sub_commands::profile_badges::set_profile_badges(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            ).await
+            )
+            .await
         }
-        Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
-        Commands::SetUserStatus(sub_command_args) => sub_commands::user_status::set_user_status(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ).await,
+        Commands::CustomEvent(sub_command_args) => {
+            sub_commands::custom_event::create_custom_event(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
+        Commands::SetUserStatus(sub_command_args) => {
+            sub_commands::user_status::set_user_status(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            )
+            .await
+        }
     }
 }

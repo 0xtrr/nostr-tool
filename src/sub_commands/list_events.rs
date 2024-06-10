@@ -45,7 +45,10 @@ pub struct ListEventsSubCommand {
     timeout: Option<u64>,
 }
 
-pub async fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
+pub async fn list_events(
+    relays: Vec<String>,
+    sub_command_args: &ListEventsSubCommand,
+) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
@@ -55,7 +58,9 @@ pub async fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCo
 
     // Handle event ids
     if sub_command_args.ids.is_some() {
-        let ids: Vec<EventId> = sub_command_args.ids.clone()
+        let ids: Vec<EventId> = sub_command_args
+            .ids
+            .clone()
             .unwrap_or(Vec::new())
             .iter()
             .map(|id| EventId::from_str(id).unwrap())
@@ -65,7 +70,9 @@ pub async fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCo
 
     // Handle author public keys
     if sub_command_args.authors.is_some() {
-        let authors: Vec<PublicKey> = sub_command_args.authors.clone()
+        let authors: Vec<PublicKey> = sub_command_args
+            .authors
+            .clone()
             .unwrap_or(Vec::new())
             .iter()
             .map(|author_pubkey| PublicKey::from_str(author_pubkey).unwrap())
@@ -114,10 +121,7 @@ pub async fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCo
             .clone()
             .unwrap_or(Vec::new())
             .into_iter()
-            .map(|p| {
-                PublicKey::from_str(p.as_str())
-                    .expect("Invalid public key")
-            })
+            .map(|p| PublicKey::from_str(p.as_str()).expect("Invalid public key"))
             .collect();
         filter = filter.pubkeys(pubkeys);
     }

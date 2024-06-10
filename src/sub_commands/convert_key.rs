@@ -23,16 +23,20 @@ pub async fn convert_key(sub_command_args: &ConvertKeySubCommand) -> Result<()> 
     let unknown_key = &sub_command_args.key.clone();
 
     let hex_key = if unknown_key.starts_with("npub") {
-        PublicKey::from_bech32(unknown_key.clone()).unwrap().to_string()
+        PublicKey::from_bech32(unknown_key.clone())
+            .unwrap()
+            .to_string()
     } else if unknown_key.starts_with("nsec") {
-        SecretKey::from_bech32(unknown_key)?.display_secret().to_string()
+        SecretKey::from_bech32(unknown_key)?
+            .display_secret()
+            .to_string()
     } else if unknown_key.starts_with("note") {
         EventId::from_bech32(unknown_key)?.to_hex()
     } else {
         // If the key is not bech32 encoded, return it as is
         unknown_key.clone()
     };
-    
+
     if sub_command_args.to_hex {
         println!("{hex_key}");
     } else {

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct CustomEventCommand {
@@ -37,14 +37,17 @@ pub async fn create_custom_event(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Parse kind input
     let kind = Kind::Custom(sub_command_args.kind);
 
     // Set content
-    let content = sub_command_args.content.clone().unwrap_or_else(|| String::from(""));
+    let content = sub_command_args
+        .content
+        .clone()
+        .unwrap_or_else(|| String::from(""));
 
     // Set up tags
     let mut tags: Vec<Tag> = vec![];
@@ -52,7 +55,10 @@ pub async fn create_custom_event(
     for tag in sub_command_args.tags.clone().iter() {
         let parts: Vec<String> = tag.split('|').map(String::from).collect();
         let tag_kind = parts.get(0).unwrap().clone();
-        tags.push(Tag::custom(TagKind::Custom(Cow::from(tag_kind)), parts[1..].to_vec()));
+        tags.push(Tag::custom(
+            TagKind::Custom(Cow::from(tag_kind)),
+            parts[1..].to_vec(),
+        ));
     }
 
     // Initialize event builder

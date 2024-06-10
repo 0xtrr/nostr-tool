@@ -4,7 +4,7 @@ use std::time::Duration;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct ProfileBadgesSubCommand {
@@ -26,10 +26,12 @@ pub async fn set_profile_badges(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client: Client = create_client(&keys, relays, difficulty_target).await?;
 
-    let badge_definition_event_ids: Vec<EventId> = sub_command_args.badge_id.iter()
+    let badge_definition_event_ids: Vec<EventId> = sub_command_args
+        .badge_id
+        .iter()
         .map(|badge_id| EventId::from_str(badge_id).unwrap())
         .collect();
     let badge_definition_filter = Filter::new()
@@ -40,12 +42,12 @@ pub async fn set_profile_badges(
         .await
         .unwrap();
 
-    let award_event_ids: Vec<EventId> = sub_command_args.award_id.iter()
+    let award_event_ids: Vec<EventId> = sub_command_args
+        .award_id
+        .iter()
         .map(|award_event_id| EventId::from_str(award_event_id).unwrap())
         .collect();
-    let badge_award_filter = Filter::new()
-        .ids(award_event_ids)
-        .kind(Kind::BadgeAward);
+    let badge_award_filter = Filter::new().ids(award_event_ids).kind(Kind::BadgeAward);
     let badge_award_events = client
         .get_events_of(vec![badge_award_filter], Some(Duration::from_secs(10)))
         .await

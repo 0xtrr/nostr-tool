@@ -6,7 +6,7 @@ use clap::Args;
 use nostr_sdk::prelude::*;
 use nostr_sdk::TagKind::SingleLetter;
 
-use crate::utils::{create_client, handle_keys, parse_key_or_id};
+use crate::utils::{create_client, parse_key_or_id, parse_private_key};
 
 #[derive(Args)]
 pub struct UserStatusSubCommand {
@@ -43,7 +43,7 @@ pub async fn set_user_status(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Set up tags
@@ -78,19 +78,14 @@ pub async fn set_user_status(
     // Add r-tag
     if let Some(r) = sub_command_args.rtag.clone() {
         tags.push(Tag::custom(
-            SingleLetter(
-                SingleLetterTag::from_char('r').unwrap()
-            ),
+            SingleLetter(SingleLetterTag::from_char('r').unwrap()),
             vec![r],
         ));
     }
 
     // Publish event
-    let event = EventBuilder::new(
-        Kind::Custom(30315),
-        sub_command_args.content.clone(),
-        tags,
-    ).to_pow_event(&keys, difficulty_target)?;
+    let event = EventBuilder::new(Kind::Custom(30315), sub_command_args.content.clone(), tags)
+        .to_pow_event(&keys, difficulty_target)?;
 
     let event_id = client.send_event(event).await?;
     if !sub_command_args.hex {

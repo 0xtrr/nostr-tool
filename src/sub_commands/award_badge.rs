@@ -3,7 +3,7 @@ use std::{process::exit, str::FromStr, time::Duration};
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct AwardBadgeSubCommand {
@@ -25,14 +25,16 @@ pub async fn award_badge(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client: Client = create_client(&keys, relays, difficulty_target).await?;
 
     let event_id: EventId = EventId::from_str(sub_command_args.badge_event_id.as_str())?;
-    let badge_definition_query = client.get_events_of(
-        vec![Filter::new().id(event_id)],
-        Some(Duration::from_secs(10)),
-    ).await?;
+    let badge_definition_query = client
+        .get_events_of(
+            vec![Filter::new().id(event_id)],
+            Some(Duration::from_secs(10)),
+        )
+        .await?;
 
     if badge_definition_query.len() != 1 {
         eprintln!("Expected one event, got {}", badge_definition_query.len());
@@ -60,7 +62,9 @@ pub async fn award_badge(
         .ptag
         .iter()
         .map(|pubkey_string| {
-            Tag::public_key(public_key::PublicKey::from_str(pubkey_string).expect("Unable to parse public key"))
+            Tag::public_key(
+                public_key::PublicKey::from_str(pubkey_string).expect("Unable to parse public key"),
+            )
         })
         .collect();
 

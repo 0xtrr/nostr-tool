@@ -4,7 +4,7 @@ use std::time::Duration;
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys};
+use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct ReactionSubCommand {
@@ -32,7 +32,7 @@ pub async fn react_to_event(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, true).await?;
+    let keys = parse_private_key(private_key, true).await?;
     let client = create_client(&keys, relays, difficulty_target).await?;
 
     if sub_command_args.reaction.trim().is_empty() {
@@ -45,11 +45,13 @@ pub async fn react_to_event(
 
     let subscription = Filter::new().event(event_id).author(author_pubkey);
 
-    let events = client.get_events_of_with_opts(
-        vec![subscription],
-        Some(Duration::from_secs(30)),
-        FilterOptions::ExitOnEOSE,
-    ).await?;
+    let events = client
+        .get_events_of_with_opts(
+            vec![subscription],
+            Some(Duration::from_secs(30)),
+            FilterOptions::ExitOnEOSE,
+        )
+        .await?;
 
     if events.is_empty() {
         eprintln!("Unable to find note with the provided event id");
@@ -58,7 +60,9 @@ pub async fn react_to_event(
 
     let event_to_react_to = events.first().unwrap();
 
-    let id = client.reaction(event_to_react_to, sub_command_args.reaction.clone()).await?;
+    let id = client
+        .reaction(event_to_react_to, sub_command_args.reaction.clone())
+        .await?;
     println!(
         "Reacted to {} with {} in event {}",
         event_id.to_bech32()?,
