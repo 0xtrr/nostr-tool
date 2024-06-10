@@ -30,12 +30,8 @@ enum Commands {
     UpdateMetadata(sub_commands::update_metadata::UpdateMetadataSubCommand),
     /// Send text note
     TextNote(sub_commands::text_note::TextNoteSubCommand),
-    /// Recommend a relay
-    RecommendRelay(sub_commands::recommend_relay::RecommendRelaySubCommand),
     /// Publish contacts from a CSV file
     PublishContactListCsv(sub_commands::publish_contactlist_csv::PublishContactListCsvSubCommand),
-    /// Send a direct message
-    SendDirectMessage(sub_commands::dm::SendDirectMessageSubCommand),
     /// Delete an event
     DeleteEvent(sub_commands::delete_event::DeleteEventSubCommand),
     /// Delete a profile
@@ -62,14 +58,8 @@ enum Commands {
     ),
     /// Mute a public key
     MutePublicKey(sub_commands::mute_publickey::MutePublickeySubCommand),
-    /// Encode/Decode a nprofile string (bech32 encoded)
-    Nprofile(sub_commands::nprofile::NprofileSubCommand),
     /// Broadcast events from file
     BroadcastEvents(sub_commands::broadcast_events::BroadcastEventsSubCommand),
-    /// Create a zap request. Currently just prints the json to console, you need to send the HTTP request yourself.
-    CreateZapRequest(sub_commands::zap_request::CreateZapRequestCommand),
-    /// Send a zap receipt note.
-    CreateZapReceipt(sub_commands::zap_reciept::SendZapSubCommand),
     /// Create a new badge
     CreateBadge(sub_commands::create_badge::CreateBadgeSubCommand),
     /// Publish award badge event
@@ -82,7 +72,8 @@ enum Commands {
     SetUserStatus(sub_commands::user_status::UserStatusSubCommand),
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     // Parse input
     let args: Cli = Cli::parse();
 
@@ -95,71 +86,58 @@ fn main() -> Result<()> {
                 args.difficulty_target,
                 sub_command_args,
             )
-        }
-        Commands::TextNote(sub_command_args) => sub_commands::text_note::broadcast_textnote(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
-        Commands::RecommendRelay(sub_command_args) => {
-            sub_commands::recommend_relay::recommend_relay(
+        }.await,
+        Commands::TextNote(sub_command_args) => {
+            sub_commands::text_note::broadcast_textnote(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
-        }
+            ).await
+        },
         Commands::PublishContactListCsv(sub_command_args) => {
             sub_commands::publish_contactlist_csv::publish_contact_list_from_csv_file(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
-        Commands::SendDirectMessage(sub_command_args) => sub_commands::dm::send(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
         Commands::DeleteEvent(sub_command_args) => sub_commands::delete_event::delete(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
         Commands::DeleteProfile(sub_command_args) => sub_commands::delete_profile::delete(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
         Commands::React(sub_command_args) => sub_commands::react::react_to_event(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
         Commands::ListEvents(sub_command_args) => {
-            sub_commands::list_events::list_events(args.relays, sub_command_args)
+            sub_commands::list_events::list_events(args.relays, sub_command_args).await
         }
         Commands::GenerateKeypair(sub_command_args) => {
-            sub_commands::generate_keypair::get_new_keypair(sub_command_args)
+            sub_commands::generate_keypair::get_new_keypair(sub_command_args).await
         }
         Commands::ConvertKey(sub_command_args) => {
-            sub_commands::convert_key::convert_key(sub_command_args)
+            sub_commands::convert_key::convert_key(sub_command_args).await
         }
-        Commands::Nprofile(sub_command_args) => sub_commands::nprofile::nprofile(sub_command_args),
-        Commands::Vanity(sub_command_args) => sub_commands::vanity::vanity(sub_command_args),
+        Commands::Vanity(sub_command_args) => sub_commands::vanity::vanity(sub_command_args).await,
         Commands::CreatePublicChannel(sub_command_args) => {
             sub_commands::create_public_channel::create_public_channel(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
         Commands::SetChannelMetadata(sub_command_args) => {
             sub_commands::set_channel_metadata::set_channel_metadata(
@@ -167,7 +145,7 @@ fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
         Commands::SendChannelMessage(sub_command_args) => {
             sub_commands::send_channel_message::send_channel_message(
@@ -175,7 +153,7 @@ fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
         Commands::HidePublicChannelMessage(sub_command_args) => {
             sub_commands::hide_public_channel_message::hide_public_channel_message(
@@ -183,63 +161,52 @@ fn main() -> Result<()> {
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
         Commands::MutePublicKey(sub_command_args) => sub_commands::mute_publickey::mute_publickey(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
         Commands::BroadcastEvents(sub_command_args) => {
-            sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args)
+            sub_commands::broadcast_events::broadcast_events(args.relays, sub_command_args).await
         }
-        Commands::CreateZapRequest(sub_command_args) => {
-            sub_commands::zap_request::create_zap_request(
-                args.private_key,
-                args.difficulty_target,
-                sub_command_args,
-            )
-        }
-        Commands::CreateZapReceipt(sub_command_args) => {
-            sub_commands::zap_reciept::send_zap_receipt(
+        Commands::CreateBadge(sub_command_args) => {
+            sub_commands::create_badge::create_badge(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
-        }
-        Commands::CreateBadge(sub_command_args) => sub_commands::create_badge::create_badge(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
-        Commands::AwardBadge(sub_command_args) => sub_commands::award_badge::award_badge(
-            args.private_key,
-            args.relays,
-            args.difficulty_target,
-            sub_command_args,
-        ),
+            ).await
+        },
+        Commands::AwardBadge(sub_command_args) => {
+            sub_commands::award_badge::award_badge(
+                args.private_key,
+                args.relays,
+                args.difficulty_target,
+                sub_command_args,
+            ).await
+        },
         Commands::ProfileBadges(sub_command_args) => {
             sub_commands::profile_badges::set_profile_badges(
                 args.private_key,
                 args.relays,
                 args.difficulty_target,
                 sub_command_args,
-            )
+            ).await
         }
         Commands::CustomEvent(sub_command_args) => sub_commands::custom_event::create_custom_event(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
         Commands::SetUserStatus(sub_command_args) => sub_commands::user_status::set_user_status(
             args.private_key,
             args.relays,
             args.difficulty_target,
             sub_command_args,
-        ),
+        ).await,
     }
 }

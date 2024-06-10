@@ -1,16 +1,17 @@
-use std::str::FromStr;
+use std::process::exit;
+use std::time::Duration;
 
 use clap::Args;
 use nostr_sdk::prelude::*;
 
-use crate::utils::{create_client, handle_keys, parse_key};
+use crate::utils::{create_client, handle_keys};
 
 #[derive(Args)]
 pub struct ReactionSubCommand {
     /// Event id to react to
     #[arg(short, long)]
     event_id: String,
-    /// Author pubkey of the event you are reacting to. Both hex and bech32 encoded keys are supported.
+    /// Author pubkey of the event you are reacting to. Must be hex format.
     #[arg(short, long)]
     author_pubkey: String,
     /// Reaction content. Set to '+' for like or '-' for dislike. Single emojis are also often used for reactions, such as in Damus Web.
@@ -21,7 +22,7 @@ pub struct ReactionSubCommand {
     hex: bool,
 }
 
-pub fn react_to_event(
+pub async fn react_to_event(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -31,18 +32,33 @@ pub fn react_to_event(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     if sub_command_args.reaction.trim().is_empty() {
-        panic!("Reaction does not contain any content")
+        eprintln!("Reaction does not contain any content");
+        exit(0)
     }
 
     let event_id = EventId::from_hex(&sub_command_args.event_id)?;
-    let author_pubkey_hex = parse_key(sub_command_args.author_pubkey.clone())?;
-    let pubkey = XOnlyPublicKey::from_str(&author_pubkey_hex)?;
+    let author_pubkey = PublicKey::from_hex(sub_command_args.author_pubkey.clone())?;
 
-    let id = client.reaction(event_id, pubkey, sub_command_args.reaction.clone())?;
+    let subscription = Filter::new().event(event_id).author(author_pubkey);
+
+    let events = client.get_events_of_with_opts(
+        vec![subscription],
+        Some(Duration::from_secs(30)),
+        FilterOptions::ExitOnEOSE,
+    ).await?;
+
+    if events.is_empty() {
+        eprintln!("Unable to find note with the provided event id");
+        exit(0);
+    }
+
+    let event_to_react_to = events.first().unwrap();
+
+    let id = client.reaction(event_to_react_to, sub_command_args.reaction.clone()).await?;
     println!(
         "Reacted to {} with {} in event {}",
         event_id.to_bech32()?,

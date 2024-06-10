@@ -26,7 +26,7 @@ pub struct UpdateMetadataSubCommand {
     hex: bool,
 }
 
-pub fn update_metadata(
+pub async fn update_metadata(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -36,8 +36,8 @@ pub fn update_metadata(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     let mut metadata = Metadata::new();
 
@@ -60,7 +60,7 @@ pub fn update_metadata(
     // NIP-05 identifier
     if let Some(nip05_identifier) = &sub_command_args.nip05 {
         // Check if the nip05 is valid
-        nip05::verify_blocking(keys.public_key(), nip05_identifier.as_str(), None)?;
+        nip05::verify(&keys.public_key(), nip05_identifier.as_str(), None).await?;
         metadata = metadata.nip05(nip05_identifier);
     }
 
@@ -74,7 +74,7 @@ pub fn update_metadata(
         metadata = metadata.lud16(lud16);
     }
 
-    let event_id = client.set_metadata(metadata)?;
+    let event_id = client.set_metadata(&metadata).await?;
     println!("Metadata updated ({})", event_id.to_bech32()?);
 
     Ok(())

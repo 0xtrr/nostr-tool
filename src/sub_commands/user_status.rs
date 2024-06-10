@@ -4,8 +4,9 @@ use std::time::Duration;
 
 use clap::Args;
 use nostr_sdk::prelude::*;
+use nostr_sdk::TagKind::SingleLetter;
 
-use crate::utils::{create_client, handle_keys, parse_key};
+use crate::utils::{create_client, handle_keys, parse_key_or_id};
 
 #[derive(Args)]
 pub struct UserStatusSubCommand {
@@ -32,7 +33,7 @@ pub struct UserStatusSubCommand {
     hex: bool,
 }
 
-pub fn set_user_status(
+pub async fn set_user_status(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -42,47 +43,56 @@ pub fn set_user_status(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Set up tags
     let mut tags: Vec<Tag> = vec![];
 
     // Add identifier tag
     if let Some(status) = &sub_command_args.status_type {
-        let status = Tag::Identifier(status.to_string());
+        let status = Tag::identifier(status.to_string());
         tags.push(status);
     }
 
     // Add expiration tag
     if let Some(expiration) = sub_command_args.expiration {
         let timestamp = Timestamp::now().add(Duration::from_secs(expiration));
-        tags.push(Tag::Expiration(timestamp));
+        tags.push(Tag::expiration(timestamp));
     }
 
     // Add p-tag
     if let Some(p) = sub_command_args.ptag.clone() {
-        let pubkey_hex = parse_key(p)?;
-        let pubkey = XOnlyPublicKey::from_str(&pubkey_hex)?;
-        tags.push(Tag::PubKey(pubkey, None))
+        let pubkey_hex = parse_key_or_id(p).await?;
+        let pubkey: PublicKey = PublicKey::from_str(&pubkey_hex)?;
+        tags.push(Tag::public_key(pubkey))
     }
 
     // Add e-tag
     if let Some(e) = sub_command_args.etag.clone() {
-        let event_id_hex = parse_key(e)?;
-        let event_id = EventId::from_hex(event_id_hex)?;
-        tags.push(Tag::Event(event_id, None, None));
+        let event_id_hex = parse_key_or_id(e).await?;
+        let event_id: EventId = EventId::from_hex(event_id_hex)?;
+        tags.push(Tag::event(event_id));
     }
 
     // Add r-tag
     if let Some(r) = sub_command_args.rtag.clone() {
-        tags.push(Tag::Reference(r));
+        tags.push(Tag::custom(
+            SingleLetter(
+                SingleLetterTag::from_char('r').unwrap()
+            ),
+            vec![r],
+        ));
     }
 
     // Publish event
-    let event = EventBuilder::new(Kind::Custom(30315), sub_command_args.content.clone(), &tags)
-        .to_pow_event(&keys, difficulty_target)?;
-    let event_id = client.send_event(event)?;
+    let event = EventBuilder::new(
+        Kind::Custom(30315),
+        sub_command_args.content.clone(),
+        tags,
+    ).to_pow_event(&keys, difficulty_target)?;
+
+    let event_id = client.send_event(event).await?;
     if !sub_command_args.hex {
         println!("Published user status with id: {}", event_id.to_bech32()?);
     } else {

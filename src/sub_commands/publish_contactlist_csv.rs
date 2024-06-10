@@ -28,7 +28,7 @@ pub struct ContactListTag {
     pub petname: Option<String>,
 }
 
-pub fn publish_contact_list_from_csv_file(
+pub async fn publish_contact_list_from_csv_file(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -38,8 +38,8 @@ pub fn publish_contact_list_from_csv_file(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     let mut rdr = csv::Reader::from_path(&sub_command_args.filepath)?;
     let mut contacts: Vec<Contact> = vec![];
@@ -50,14 +50,14 @@ pub fn publish_contact_list_from_csv_file(
             None => None,
         };
         let clt = Contact {
-            pk: XOnlyPublicKey::from_str(&tag.pubkey)?,
+            public_key: PublicKey::from_str(&tag.pubkey)?,
             relay_url,
             alias: tag.petname,
         };
         contacts.push(clt);
     }
 
-    client.set_contact_list(contacts)?;
+    client.set_contact_list(contacts).await?;
     println!("Contact list imported!");
     Ok(())
 }

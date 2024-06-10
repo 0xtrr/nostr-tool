@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use clap::Args;
 use nostr_sdk::prelude::*;
 
@@ -7,7 +9,7 @@ use crate::utils::{create_client, handle_keys};
 pub struct CustomEventCommand {
     /// Event kind
     #[arg(short, long)]
-    kind: u64,
+    kind: u16,
 
     /// Note content
     #[arg(short, long)]
@@ -25,7 +27,7 @@ pub struct CustomEventCommand {
     hex: bool,
 }
 
-pub fn create_custom_event(
+pub async fn create_custom_event(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -35,17 +37,14 @@ pub fn create_custom_event(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     // Parse kind input
-    let kind = Kind::from(sub_command_args.kind);
+    let kind = Kind::Custom(sub_command_args.kind);
 
     // Set content
-    let content = match sub_command_args.content.clone() {
-        Some(content) => content,
-        None => String::from(""),
-    };
+    let content = sub_command_args.content.clone().unwrap_or_else(|| String::from(""));
 
     // Set up tags
     let mut tags: Vec<Tag> = vec![];
@@ -53,14 +52,14 @@ pub fn create_custom_event(
     for tag in sub_command_args.tags.clone().iter() {
         let parts: Vec<String> = tag.split('|').map(String::from).collect();
         let tag_kind = parts.get(0).unwrap().clone();
-        tags.push(Tag::Generic(TagKind::Custom(tag_kind), parts[1..].to_vec()));
+        tags.push(Tag::custom(TagKind::Custom(Cow::from(tag_kind)), parts[1..].to_vec()));
     }
 
     // Initialize event builder
-    let event = EventBuilder::new(kind, content, &tags).to_pow_event(&keys, difficulty_target)?;
+    let event = EventBuilder::new(kind, content, tags).to_pow_event(&keys, difficulty_target)?;
 
     // Publish event
-    let event_id = client.send_event(event)?;
+    let event_id = client.send_event(event).await?;
 
     if !sub_command_args.hex {
         println!("Published custom event with id: {}", event_id.to_bech32()?);

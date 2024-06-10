@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::time::Duration;
 
 use clap::Args;
@@ -13,12 +14,9 @@ pub struct ProfileBadgesSubCommand {
     /// Badge award event id
     #[arg(short, long, action = clap::ArgAction::Append)]
     award_id: Vec<String>,
-    // Print keys as hex
-    #[arg(long, default_value = "false")]
-    hex: bool,
 }
 
-pub fn set_profile_badges(
+pub async fn set_profile_badges(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -28,21 +26,29 @@ pub fn set_profile_badges(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client: blocking::Client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client: Client = create_client(&keys, relays, difficulty_target).await?;
 
+    let badge_definition_event_ids: Vec<EventId> = sub_command_args.badge_id.iter()
+        .map(|badge_id| EventId::from_str(badge_id).unwrap())
+        .collect();
     let badge_definition_filter = Filter::new()
-        .ids(sub_command_args.badge_id.clone())
+        .ids(badge_definition_event_ids)
         .kind(Kind::BadgeDefinition);
     let badge_defintion_events = client
         .get_events_of(vec![badge_definition_filter], Some(Duration::from_secs(10)))
+        .await
         .unwrap();
 
+    let award_event_ids: Vec<EventId> = sub_command_args.award_id.iter()
+        .map(|award_event_id| EventId::from_str(award_event_id).unwrap())
+        .collect();
     let badge_award_filter = Filter::new()
-        .ids(sub_command_args.award_id.clone())
+        .ids(award_event_ids)
         .kind(Kind::BadgeAward);
     let badge_award_events = client
         .get_events_of(vec![badge_award_filter], Some(Duration::from_secs(10)))
+        .await
         .unwrap();
 
     let event = EventBuilder::profile_badges(
@@ -53,18 +59,10 @@ pub fn set_profile_badges(
     .to_pow_event(&keys, difficulty_target)?;
 
     // Publish event
-    let event_id = client.send_event(event)?;
-    if !sub_command_args.hex {
-        println!(
-            "Published profile badges event with id: {}",
-            event_id.to_bech32()?
-        );
-    } else {
-        println!(
-            "Published profile badges event with id: {}",
-            event_id.to_hex()
-        );
-    }
+    let event_id = client.send_event(event).await?;
+    println!("Published profile badges event with id:");
+    println!("Hex: {}", event_id.to_hex());
+    println!("Bech32: {}", event_id.to_bech32()?);
 
     Ok(())
 }

@@ -8,7 +8,7 @@ pub struct GenerateKeypairSubCommand {
     print_hex: bool,
 }
 
-pub fn get_new_keypair(sub_command_args: &GenerateKeypairSubCommand) -> Result<()> {
+pub async fn get_new_keypair(sub_command_args: &GenerateKeypairSubCommand) -> Result<()> {
     let keys = Keys::generate();
     if sub_command_args.print_hex {
         println!("Private key: {}", keys.secret_key()?.display_secret());

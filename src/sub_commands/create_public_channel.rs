@@ -1,6 +1,7 @@
-use crate::utils::{create_client, handle_keys};
 use clap::Args;
 use nostr_sdk::prelude::*;
+
+use crate::utils::{create_client, handle_keys};
 
 #[derive(Args)]
 pub struct CreatePublicChannelSubCommand {
@@ -13,12 +14,9 @@ pub struct CreatePublicChannelSubCommand {
     /// Channel picture
     #[arg(short, long)]
     picture: Option<String>,
-    // Print keys as hex
-    #[arg(long, default_value = "false")]
-    hex: bool,
 }
 
-pub fn create_public_channel(
+pub async fn create_public_channel(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -29,41 +27,29 @@ pub fn create_public_channel(
     }
 
     // Process keypair and create a nostr client
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays.clone(), difficulty_target).await?;
 
     // Create metadata
-    let mut metadata = Metadata::new().name(sub_command_args.name.as_str());
+    let mut metadata: Metadata = Metadata::new().name(sub_command_args.name.clone());
 
     if let Some(about) = sub_command_args.about.clone() {
-        metadata = metadata.about(about.as_str());
+        metadata = metadata.about(about);
     }
 
     if let Some(picture) = sub_command_args.picture.clone() {
-        metadata = metadata.picture(Url::parse(picture.as_str())?);
+        metadata = metadata.picture(Url::parse(picture.as_str()).unwrap());
     }
 
     // Send event
-    let event_id = client.new_channel(metadata)?;
+    let event: Event = EventBuilder::channel(&metadata).to_event(&keys).unwrap();
+    let event_id = client.send_event(event).await?;
 
     // Print results
     println!("\nCreated new public channel!");
-    println!("Name: {}", sub_command_args.name.as_str());
-
-    if let Some(about) = sub_command_args.about.clone() {
-        println!("About: {}", about.as_str());
-    }
-
-    if let Some(picture) = sub_command_args.picture.clone() {
-        println!("Picture: {}", picture.as_str());
-    }
-
-    println!(
-        "Nchannel id: {}",
-        ChannelId::from_hex(event_id.to_hex())?.to_bech32()?
-    );
-    println!("Bech32 note id: {}", event_id.to_bech32()?);
-    println!("Hex id: {}", event_id.to_hex());
+    println!("Channel ID:");
+    println!("Hex: {}", event_id.to_hex());
+    println!("Bech32: {}", event_id.to_bech32()?);
 
     Ok(())
 }

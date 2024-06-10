@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr, time::Duration};
+use std::{str::FromStr, time::Duration};
 
 use clap::Args;
 use nostr_sdk::prelude::*;
@@ -45,76 +45,103 @@ pub struct ListEventsSubCommand {
     timeout: Option<u64>,
 }
 
-pub fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
+pub async fn list_events(relays: Vec<String>, sub_command_args: &ListEventsSubCommand) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let client = create_client(&Keys::generate(), relays, 0)?;
+    let client = create_client(&Keys::generate(), relays, 0).await?;
+    let mut filter = Filter::new();
 
-    let ids: Vec<String> = sub_command_args.ids.clone().unwrap_or(Vec::new());
+    // Handle event ids
+    if sub_command_args.ids.is_some() {
+        let ids: Vec<EventId> = sub_command_args.ids.clone()
+            .unwrap_or(Vec::new())
+            .iter()
+            .map(|id| EventId::from_str(id).unwrap())
+            .collect();
+        filter = filter.ids(ids);
+    }
 
-    let authors: Vec<String> = sub_command_args.authors.clone().unwrap_or(Vec::new());
+    // Handle author public keys
+    if sub_command_args.authors.is_some() {
+        let authors: Vec<PublicKey> = sub_command_args.authors.clone()
+            .unwrap_or(Vec::new())
+            .iter()
+            .map(|author_pubkey| PublicKey::from_str(author_pubkey).unwrap())
+            .collect();
+        filter = filter.authors(authors);
+    }
 
-    // Convert kind number to Kind struct
-    let kinds: Vec<Kind> = sub_command_args
-        .kinds
-        .clone()
-        .unwrap_or(Vec::new())
-        .into_iter()
-        .map(Kind::from)
-        .collect();
+    // Handle kind numbers
+    if sub_command_args.kinds.is_some() {
+        // Convert kind number to Kind struct
+        let kinds: Vec<Kind> = sub_command_args
+            .kinds
+            .clone()
+            .unwrap_or(Vec::new())
+            .into_iter()
+            .map(|x| x as u16)
+            .map(Kind::from)
+            .collect();
+        filter = filter.kinds(kinds);
+    }
 
-    // Convert event id string to EventId struct
-    let events: Vec<EventId> = sub_command_args
-        .etag
-        .clone()
-        .unwrap_or(Vec::new())
-        .into_iter()
-        .map(|e| {
-            if e.starts_with("note1") {
-                EventId::from_bech32(e.as_str()).expect("Invalid event id")
-            } else {
-                EventId::from_str(e.as_str()).expect("Invalid event id")
-            }
-        })
-        .collect();
+    // Handle e-tags
+    if sub_command_args.etag.is_some() {
+        // Convert event id string to EventId struct
+        let events: Vec<EventId> = sub_command_args
+            .etag
+            .clone()
+            .unwrap_or(Vec::new())
+            .into_iter()
+            .map(|e| {
+                if e.starts_with("note1") {
+                    EventId::from_bech32(e.as_str()).expect("Invalid event id")
+                } else {
+                    EventId::from_str(e.as_str()).expect("Invalid event id")
+                }
+            })
+            .collect();
+        filter = filter.events(events);
+    }
 
-    // Convert pubkey strings to XOnlyPublicKey struct
-    let pubkeys: Vec<XOnlyPublicKey> = sub_command_args
-        .ptag
-        .clone()
-        .unwrap_or(Vec::new())
-        .into_iter()
-        .map(|p| {
-            Keys::from_pk_str(p.as_str())
-                .expect("Invalid public key")
-                .public_key()
-        })
-        .collect();
+    // Handle p-tags
+    if sub_command_args.ptag.is_some() {
+        // Convert pubkey strings to XOnlyPublicKey struct
+        let pubkeys: Vec<PublicKey> = sub_command_args
+            .ptag
+            .clone()
+            .unwrap_or(Vec::new())
+            .into_iter()
+            .map(|p| {
+                PublicKey::from_str(p.as_str())
+                    .expect("Invalid public key")
+            })
+            .collect();
+        filter = filter.pubkeys(pubkeys);
+    }
+
+    // Handle d-tags
+    if sub_command_args.dtag.is_some() {
+        filter = filter.identifiers(sub_command_args.dtag.clone().unwrap_or(Vec::new()));
+    }
+
+    if sub_command_args.since.is_some() {
+        filter = filter.since(sub_command_args.since.map(Timestamp::from).unwrap())
+    }
+
+    if sub_command_args.until.is_some() {
+        filter = filter.until(sub_command_args.until.map(Timestamp::from).unwrap())
+    }
+
+    if sub_command_args.limit.is_some() {
+        filter = filter.limit(sub_command_args.limit.unwrap())
+    }
 
     let timeout = sub_command_args.timeout.map(Duration::from_secs);
 
-    let identifiers = sub_command_args.dtag.clone().unwrap_or(Vec::new());
-
-    let events: Vec<Event> = client.get_events_of(
-        vec![Filter {
-            ids,
-            authors,
-            kinds,
-            events,
-            pubkeys,
-            hashtags: Vec::new(),
-            references: Vec::new(),
-            search: None,
-            since: sub_command_args.since.map(Timestamp::from),
-            until: sub_command_args.until.map(Timestamp::from),
-            limit: sub_command_args.limit,
-            identifiers,
-            generic_tags: HashMap::new(),
-        }],
-        timeout,
-    )?;
+    let events: Vec<Event> = client.get_events_of(vec![filter], timeout).await?;
 
     if let Some(output) = &sub_command_args.output {
         let file = std::fs::File::create(output)?;

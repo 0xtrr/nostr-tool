@@ -11,7 +11,7 @@ pub struct VanitySubCommand {
     hex: bool,
 }
 
-pub fn vanity(sub_command_args: &VanitySubCommand) -> Result<()> {
+pub async fn vanity(sub_command_args: &VanitySubCommand) -> Result<()> {
     let num_cores = num_cpus::get();
     let keys = Keys::vanity(
         sub_command_args.prefixes.clone(),

@@ -24,7 +24,7 @@ pub struct DeleteProfileSubCommand {
     timeout: Option<u64>,
 }
 
-pub fn delete(
+pub async fn delete(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -34,14 +34,14 @@ pub fn delete(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     let timeout = sub_command_args.timeout.map(Duration::from_secs);
 
     if sub_command_args.events_only {
         // go through all of the user events
-        let authors: Vec<String> = vec![client.keys().public_key().to_string()];
+        let authors: Vec<PublicKey> = vec![keys.public_key()];
         println!("checking author events...");
 
         // Convert kind number to Kind struct
@@ -50,20 +50,31 @@ pub fn delete(
             .clone()
             .unwrap_or(Vec::new())
             .into_iter()
+            .map(|x| x as u16)
             .map(Kind::from)
             .collect();
 
         let events: Vec<Event> =
-            client.get_events_of(vec![Filter::new().authors(authors).kinds(kinds)], timeout)?;
+            client.get_events_of(vec![Filter::new().authors(authors).kinds(kinds)], timeout).await?;
+
+        let event_ids: Vec<EventIdOrCoordinate> = events
+            .iter()
+            .map(|event| EventIdOrCoordinate::from(event.id))
+            .collect::<Vec<EventIdOrCoordinate>>();
 
         println!("Retrieved events to delete: {}", events.len());
-        for event in events {
-            let event_id = client.delete_event(event.id, sub_command_args.reason.clone())?;
-            if !sub_command_args.hex {
-                println!("Deleted event with id: {}", event_id.to_bech32()?);
-            } else {
-                println!("Deleted event with id: {}", event_id.to_hex());
-            }
+
+        let delete_event: Event = EventBuilder::delete_with_reason(
+            event_ids,
+            sub_command_args.reason.clone().unwrap_or(String::new()),
+        ).to_pow_event(&keys, difficulty_target).unwrap();
+
+        let event_id = client.send_event(delete_event).await?;
+
+        if !sub_command_args.hex {
+            println!("All event deleted in event {}", event_id.to_bech32()?);
+        } else {
+            println!("All event deleted in event {}", event_id.to_hex());
         }
     } else {
         // Not a perfect delete but multiple clients trigger off of this metadata
@@ -73,7 +84,7 @@ pub fn delete(
             .about("Deleted")
             .custom_field("deleted", Value::Bool(true));
 
-        let event_id = client.set_metadata(metadata)?;
+        let event_id = client.set_metadata(&metadata).await?;
         println!("Metadata updated ({})", event_id.to_bech32()?);
     }
     Ok(())

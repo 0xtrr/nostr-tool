@@ -32,12 +32,9 @@ pub struct CreateBadgeSubCommand {
     ///
     #[arg(long)]
     thumb_size_height: Option<u64>,
-    // Print keys as hex
-    #[arg(long, default_value = "false")]
-    hex: bool,
 }
 
-pub fn create_badge(
+pub async fn create_badge(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
@@ -47,8 +44,8 @@ pub fn create_badge(
         panic!("No relays specified, at least one relay is required!")
     }
 
-    let keys = handle_keys(private_key, sub_command_args.hex, true)?;
-    let client = create_client(&keys, relays, difficulty_target)?;
+    let keys = handle_keys(private_key, true).await?;
+    let client = create_client(&keys, relays, difficulty_target).await?;
 
     let image_size = match (
         sub_command_args.image_size_height,
@@ -70,12 +67,12 @@ pub fn create_badge(
         let url = UncheckedUrl::from(thumb_url);
 
         if let Some((width, height)) = thumb_size {
-            Some(vec![(url, Some(ImageDimensions { width, height }))])
+            vec![(url, Some(ImageDimensions { width, height }))]
         } else {
-            Some(vec![(url, None)])
+            vec![(url, None)]
         }
     } else {
-        None
+        Vec::new()
     };
 
     let image_url: Option<UncheckedUrl> =
@@ -92,15 +89,10 @@ pub fn create_badge(
     .to_pow_event(&keys, difficulty_target)?;
 
     // Publish event
-    let event_id = client.send_event(event)?;
-    if !sub_command_args.hex {
-        println!(
-            "Published badge definition with id: {}",
-            event_id.to_bech32()?
-        );
-    } else {
-        println!("Published badge definition with id: {}", event_id.to_hex());
-    }
+    let event_id = client.send_event(event).await?;
+    println!( "Published badge definition with id:");
+    println!("Hex: {}", event_id.to_hex());
+    println!("Bech32: {}", event_id.to_bech32()?);
 
     Ok(())
 }
