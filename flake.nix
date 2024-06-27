@@ -17,35 +17,33 @@
         pkgs = import nixpkgs { inherit system overlays; };
         rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         inputs = [
-	  rust
+          rust
           pkgs.rust-analyzer
-	  pkgs.openssl
+          pkgs.openssl
           pkgs.zlib
           pkgs.gcc
           pkgs.pkg-config
-          pkgs.just
-	  pkgs.clang
-	];
+          pkgs.clang
+        ];
       in
       {
-        defaultPackage = pkgs.rustPlatform.buildRustPackage {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          name = "nostr-tool";
           src = ./.;
-
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
-
           nativeBuildInputs = inputs;
         };
+        formatter = pkgs.nixpkgs-fmt;
 
-
-        devShell = pkgs.mkShell {
-	  packages = inputs;
+        devShells.default = pkgs.mkShell {
+          packages = inputs;
           shellHook = ''
-	    export LIBCLANG_PATH=${pkgs.libclang.lib}/lib/
-            export LD_LIBRARY_PATH=${pkgs.openssl}/lib:$LD_LIBRARY_PATH
+            	    export LIBCLANG_PATH=${pkgs.libclang.lib}/lib/
+                        export LD_LIBRARY_PATH=${pkgs.openssl}/lib:$LD_LIBRARY_PATH
           '';
-	};
+        };
       }
     );
 }
