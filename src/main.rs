@@ -8,7 +8,7 @@ mod utils;
 #[derive(Parser)]
 #[command(name = "nostr-tool")]
 #[command(author = "0xtr. <oxtrr@protonmail.com")]
-#[command(version = "0.1")]
+#[command(version = "0.5")]
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
