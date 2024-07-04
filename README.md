@@ -16,7 +16,7 @@ Installation instructions can be found in [INSTALL.md](docs/INSTALL.md).
 
 ## Usage
 Run `nostr-tool -h` to see available options and subcommands. To get help with the sub commands, run `nostr-tool [subcommand] -h`, e.g. `nostr-tool text-note -h`.
-More examples can be found in [EXAMPLES.ms](docs/EXAMPLES.md).
+More examples can be found in [EXAMPLES.md](docs/EXAMPLES.md).
 
 ## Contributions
 
