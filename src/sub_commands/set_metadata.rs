@@ -5,7 +5,7 @@ use nostr_sdk::prelude::*;
 use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
-pub struct UpdateMetadataSubCommand {
+pub struct SetMetadataSubCommand {
     /// Set profile name
     #[arg(short, long)]
     name: Option<String>,
@@ -24,16 +24,19 @@ pub struct UpdateMetadataSubCommand {
     /// Set your LUD-16 LN address
     #[arg(long)]
     lud16: Option<String>,
+    /// Arbitrary fields not in the protocol. Use this syntax: "key:value"
+    #[arg(short, long)]
+    extra_field: Vec<String>,
     /// Print keys as hex
     #[arg(long, default_value = "false")]
     hex: bool,
 }
 
-pub async fn update_metadata(
+pub async fn set_metadata(
     private_key: Option<String>,
     relays: Vec<String>,
     difficulty_target: u8,
-    sub_command_args: &UpdateMetadataSubCommand,
+    sub_command_args: &SetMetadataSubCommand,
 ) -> Result<()> {
     if relays.is_empty() {
         panic!("No relays specified, at least one relay is required!")
@@ -77,8 +80,15 @@ pub async fn update_metadata(
         metadata = metadata.lud16(lud16);
     }
 
+    for ef in sub_command_args.extra_field.iter() {
+        let sef: Vec<&str> = ef.split(":").collect();
+        if sef.len() == 2 {
+            metadata = metadata.custom_field(sef[0], sef[1])
+        }
+    }
+
     let event_id = client.set_metadata(&metadata).await?;
-    println!("Metadata updated ({})", event_id.to_bech32()?);
+    println!("New metadata event: {}", event_id.to_bech32()?);
 
     Ok(())
 }

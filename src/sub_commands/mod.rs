@@ -16,6 +16,6 @@ pub mod react;
 pub mod send_channel_message;
 pub mod set_channel_metadata;
 pub mod text_note;
-pub mod update_metadata;
+pub mod set_metadata;
 pub mod user_status;
 pub mod vanity;

@@ -26,8 +26,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Update metadata
-    UpdateMetadata(sub_commands::update_metadata::UpdateMetadataSubCommand),
+    /// Set metadata. Be aware that this will simply replace your current kind 0 event.
+    SetMetadata(sub_commands::set_metadata::SetMetadataSubCommand),
     /// Send text note
     TextNote(sub_commands::text_note::TextNoteSubCommand),
     /// Publish contacts from a CSV file
@@ -79,9 +79,9 @@ async fn main() -> Result<()> {
 
     // Post event
     match &args.command {
-        Commands::UpdateMetadata(sub_command_args) => {
+        Commands::SetMetadata(sub_command_args) => {
             {
-                sub_commands::update_metadata::update_metadata(
+                sub_commands::set_metadata::set_metadata(
                     args.private_key,
                     args.relays,
                     args.difficulty_target,
