@@ -81,7 +81,7 @@ pub async fn set_metadata(
     }
 
     for ef in sub_command_args.extra_field.iter() {
-        let sef: Vec<&str> = ef.split(":").collect();
+        let sef: Vec<&str> = ef.split(':').collect();
         if sef.len() == 2 {
             metadata = metadata.custom_field(sef[0], sef[1])
         }

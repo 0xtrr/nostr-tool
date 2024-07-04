@@ -35,11 +35,7 @@ pub async fn mute_publickey(
         .mute_channel_user(pubkey_to_mute, sub_command_args.reason.clone())
         .await?;
 
-    println!(
-        "Public key {} muted in event {}",
-        pubkey_to_mute,
-        event_id
-    );
+    println!("Public key {} muted in event {}", pubkey_to_mute, event_id);
 
     Ok(())
 }
