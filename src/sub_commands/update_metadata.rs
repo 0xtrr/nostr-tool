@@ -6,22 +6,25 @@ use crate::utils::{create_client, parse_private_key};
 
 #[derive(Args)]
 pub struct UpdateMetadataSubCommand {
-    /// Profile name
+    /// Set profile name
     #[arg(short, long)]
     name: Option<String>,
-    /// About
+    /// Set your bio
     #[arg(short, long)]
     about: Option<String>,
-    /// Picture URL
+    /// Set your profile image URL
     #[arg(short, long)]
     picture: Option<String>,
+    /// Set your NIP-05
     #[arg(long)]
     nip05: Option<String>,
+    /// Set your LUD-06 LNURL
     #[arg(long)]
     lud06: Option<String>,
+    /// Set your LUD-16 LN address
     #[arg(long)]
     lud16: Option<String>,
-    // Print keys as hex
+    /// Print keys as hex
     #[arg(long, default_value = "false")]
     hex: bool,
 }
