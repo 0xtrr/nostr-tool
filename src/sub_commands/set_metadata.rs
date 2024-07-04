@@ -24,6 +24,9 @@ pub struct SetMetadataSubCommand {
     /// Set your LUD-16 LN address
     #[arg(long)]
     lud16: Option<String>,
+    /// External identities. Use this syntax: "platform:identity:proof"
+    #[arg(short, long)]
+    identities: Vec<String>,
     /// Arbitrary fields not in the protocol. Use this syntax: "key:value"
     #[arg(short, long)]
     extra_field: Vec<String>,
@@ -80,6 +83,7 @@ pub async fn set_metadata(
         metadata = metadata.lud16(lud16);
     }
 
+    // Set custom fields
     for ef in sub_command_args.extra_field.iter() {
         let sef: Vec<&str> = ef.split(':').collect();
         if sef.len() == 2 {
@@ -87,7 +91,25 @@ pub async fn set_metadata(
         }
     }
 
-    let event_id = client.set_metadata(&metadata).await?;
+    // External identity tags (NIP-39)
+    let mut identity_tags: Vec<Tag> = Vec::new();
+    for identity in &sub_command_args.identities {
+        let parts: Vec<&str> = identity.split(':').collect();
+        if parts.len() == 3 {
+            let platform_identity = format!("{}:{}", parts[0], parts[1]);
+            let proof = parts[2].to_string();
+            let tag = Tag::custom(TagKind::Custom("i".into()), [platform_identity, proof]);
+            identity_tags.push(tag);
+        } else {
+            eprintln!("Invalid identity format: {}", identity);
+        }
+    }
+
+    let event = EventBuilder::metadata(&metadata)
+        .add_tags(identity_tags)
+        .to_pow_event(&keys, difficulty_target)
+        .unwrap();
+    let event_id = client.send_event(event).await?;
     println!("New metadata event: {}", event_id.to_bech32()?);
 
     Ok(())
